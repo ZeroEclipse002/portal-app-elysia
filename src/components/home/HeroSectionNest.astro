@@ -1,0 +1,27 @@
+---
+import type { Post, Priority } from "@/types/post";
+import { HeroSectionContent } from "./HeroSectionContent";
+
+const { data } = Astro.props;
+const feed = await fetch(Astro.url.origin + "/api/feed");
+const feedData = await feed.json();
+
+const recent: Post[] = feedData.recent;
+const priority: Priority[] = feedData.priority;
+
+const initialData = priority[0] ||
+    recent[0] || {
+        title: "Welcome",
+        type: "Project",
+        shortDescription:
+            "Experience the future of digital innovation with our cutting-edge solutions.",
+        id: "#",
+    };
+---
+
+<HeroSectionContent
+    client:load
+    recent={recent}
+    priority={priority}
+    initialData={initialData}
+/>

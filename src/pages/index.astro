@@ -1,0 +1,54 @@
+---
+import { fetchClient } from "@/lib/utils";
+import Layout from "../layouts/Layout.astro";
+import SequenceComp from "@/components/home/SequenceComp.astro";
+const data = Astro.locals;
+
+const { data: dataUser } = await fetchClient.api.test.get();
+---
+
+<Layout>
+  <SequenceComp server:defer>
+    <div slot="fallback" class="w-full h-full bg-slate-50 overflow-x-hidden">
+      <div
+        class="w-full max-w-[90vw] md:max-w-[85vw] lg:max-w-[80vw] mx-auto py-8 space-y-8 animate-pulse"
+      >
+        {/* Marquee Section */}
+        <div
+          class="w-full h-24 bg-gradient-to-r from-slate-100 via-white to-slate-100 rounded-xl"
+        >
+        </div>
+
+        {/* Hero Section */}
+        <div
+          class="w-full min-h-[85vh] bg-gradient-to-br from-slate-100 via-white to-slate-200 rounded-2xl p-8 flex flex-col justify-center items-center"
+        >
+          <div class="w-full max-w-3xl space-y-6">
+            <div class="h-8 w-24 bg-slate-200 rounded-full"></div>
+            <div class="h-12 w-3/4 bg-slate-200 rounded-lg"></div>
+            <div class="h-32 w-full bg-slate-200 rounded-lg"></div>
+            <div class="flex gap-4">
+              <div class="h-10 w-32 bg-slate-200 rounded-full"></div>
+              <div class="h-10 w-32 bg-slate-200 rounded-full"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Carousel Section */}
+        <div
+          class="w-full h-96 bg-gradient-to-r from-slate-100 via-white to-slate-100 rounded-xl"
+        >
+        </div>
+
+        {/* List Section */}
+        <div class="w-full space-y-4">
+          {
+            [1, 2, 3].map(() => (
+              <div class="w-full h-24 bg-gradient-to-r from-slate-100 via-white to-slate-100 rounded-xl" />
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </SequenceComp>
+</Layout>

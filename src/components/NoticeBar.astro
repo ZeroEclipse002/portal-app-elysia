@@ -1,0 +1,33 @@
+---
+
+---
+
+<div
+    transition:name="noticebar"
+    id="spinner"
+    class="fixed top-0 left-0 z-[100] h-1 w-0 bg-blue-600 transition-all duration-[5000ms] ease-out"
+>
+</div>
+
+<style>
+    .spinanim {
+        width: 100% !important;
+        transition: all 5000ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+    }
+</style>
+
+<script>
+    document.addEventListener("astro:before-preparation", () => {
+        document.getElementById("spinner")?.classList.add("spinanim");
+        document.querySelectorAll(".backdropper")?.forEach((el) => {
+            el.classList.add("cursor-wait", "brightness-75");
+        });
+    });
+
+    document.addEventListener("astro:after-preparation", () => {
+        document.getElementById("spinner")?.classList.remove("spinanim");
+        document.querySelectorAll(".backdropper")?.forEach((el) => {
+            el.classList.remove("cursor-wait", "brightness-75");
+        });
+    });
+</script>

@@ -1,0 +1,29 @@
+---
+import HeroSectionNest from "./HeroSectionNest.astro";
+---
+
+<HeroSectionNest server:defer>
+  <div slot="fallback" class="w-full flex justify-center items-center mb-6">
+    <div
+      class="w-[90vw] md:w-[85vw] lg:w-[80vw] relative min-h-[85vh] bg-gradient-to-br from-slate-100 via-white to-slate-400 rounded-2xl p-8 md:p-16 flex flex-col justify-center items-center shadow-lg animate-pulse"
+    >
+      <div class="absolute top-8 left-8 md:top-10 md:left-10">
+        <div
+          class="backdrop-blur-md bg-white/80 rounded-full p-1.5 flex gap-3 shadow-sm"
+        >
+          <div class="h-10 w-24 bg-slate-200 rounded-full"></div>
+          <div class="h-10 w-24 bg-slate-200 rounded-full"></div>
+        </div>
+      </div>
+      <div class="w-full max-w-3xl space-y-6">
+        <div class="h-8 w-24 bg-slate-200 rounded-full"></div>
+        <div class="h-12 w-3/4 bg-slate-200 rounded-lg"></div>
+        <div class="h-32 w-full bg-slate-200 rounded-lg"></div>
+        <div class="flex gap-4">
+          <div class="h-10 w-32 bg-slate-200 rounded-full"></div>
+          <div class="h-10 w-32 bg-slate-200 rounded-full"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</HeroSectionNest>

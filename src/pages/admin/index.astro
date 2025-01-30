@@ -1,0 +1,92 @@
+---
+import { UsersTable } from "@/components/UsersTable";
+import { PostsTable } from "@/components/PostsTable";
+import Layout from "@/layouts/Layout.astro";
+import { db } from "@/db";
+import { PriorityPostsTable } from "@/components/PriorityPostsTable";
+
+if (Astro.locals.user?.role !== "admin") {
+  return Astro.redirect("/");
+}
+
+const initialPosts = await db.query.posts.findMany({
+  with: {
+    user: {
+      columns: {
+        name: true,
+      },
+    },
+  },
+});
+
+const priority = await db.query.priority.findMany({
+  columns: {
+    postId: true,
+    priority: true,
+  },
+  with: {
+    post: {
+      columns: {
+        title: true,
+      },
+    },
+  },
+});
+
+const posts = initialPosts.map((post) => {
+  const priorityPost = priority.find((p) => p.postId === post.id);
+  return {
+    ...post,
+    priority: priorityPost ? true : false,
+  };
+});
+
+console.log(posts);
+---
+
+<Layout>
+  <main
+    class="container bg-slate-50 max-w-full min-h-[calc(100vh-100px)] mx-auto p-8"
+  >
+    <header class="mb-8">
+      <div
+        class="rounded-xl bg-gradient-to-r from-slate-50 to-white p-8 shadow-sm border border-slate-100"
+      >
+        <h1 class="text-4xl font-bold text-slate-900">Admin Dashboard</h1>
+      </div>
+    </header>
+
+    <section class="grid gap-8 md:grid-cols-2">
+      <div
+        class="rounded-xl bg-white p-8 shadow-sm border border-slate-100 transition-all hover:shadow-md"
+      >
+        <h2 class="text-2xl font-semibold text-slate-800 mb-6">Users</h2>
+        <UsersTable client:load />
+      </div>
+
+      <div
+        class="rounded-xl bg-white p-8 shadow-sm border border-slate-100 transition-all hover:shadow-md"
+      >
+        <h2 class="text-2xl font-semibold text-slate-800 mb-6">Posts</h2>
+        <PostsTable posts={posts} client:load />
+      </div>
+      <div
+        class="rounded-xl bg-white p-8 shadow-sm border border-slate-100 transition-all hover:shadow-md"
+      >
+        <h2 class="text-2xl font-semibold text-slate-800 mb-6">Family</h2>
+      </div>
+      <div
+        class="rounded-xl bg-white p-8 shadow-sm border border-slate-100 transition-all hover:shadow-md"
+      >
+        <h2 class="text-2xl font-semibold text-slate-800 mb-6">
+          Priority Posts
+        </h2>
+        <PriorityPostsTable
+          priorityPosts={priority}
+          posts={posts}
+          client:load
+        />
+      </div>
+    </section>
+  </main>
+</Layout>

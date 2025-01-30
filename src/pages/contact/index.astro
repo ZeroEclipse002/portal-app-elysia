@@ -1,0 +1,17 @@
+---
+import Layout from "@/layouts/Layout.astro";
+
+const session = () => {
+  if (Astro.locals.session) {
+    return Astro.locals.session;
+  } else {
+    // Redirect to login page if the user is not authenticated
+    return Astro.redirect("/login");
+  }
+};
+---
+
+<Layout>
+  <h1>Contact</h1>
+  <pre>{JSON.stringify(session(), null, 2)}</pre>
+</Layout>

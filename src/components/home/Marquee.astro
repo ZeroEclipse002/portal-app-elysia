@@ -1,0 +1,71 @@
+---
+interface Props {
+  data?: {
+    items?: string[];
+  };
+}
+
+const { data } = Astro.props;
+const items = data?.items || ["Marquee Content"];
+---
+
+<div class="w-full bg-white/80 backdrop-blur-sm py-6">
+  <div class="container mx-auto max-w-7xl px-8">
+    <div class="marquee-container">
+      <div class="marquee-content">
+        {
+          items.map((item) => (
+            <span class="mx-8 text-base font-medium text-gray-600 hover:text-gray-900 transition-all duration-300 hover:scale-105">
+              {item}
+            </span>
+          ))
+        }
+      </div>
+      <div class="marquee-content" aria-hidden="true">
+        {
+          items.map((item) => (
+            <span class="mx-8 text-base font-medium text-gray-600 hover:text-gray-900 transition-all duration-300 hover:scale-105">
+              {item}
+            </span>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .marquee-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 10%,
+      black 90%,
+      transparent
+    );
+  }
+
+  .marquee-content {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    animation: marquee 30s linear infinite;
+    transform: translateX(100%);
+  }
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+  .marquee-content:hover {
+    animation-play-state: paused;
+  }
+</style>

@@ -1,0 +1,39 @@
+---
+import HeroSection from "@/components/home/HeroSection.astro";
+import Layout from "@/layouts/Layout.astro";
+import Carousel from "@/components/home/Carousel.astro";
+import List from "@/components/home/List.astro";
+import Marquee from "@/components/home/Marquee.astro";
+import { fetchClient } from "@/lib/utils";
+const data = Astro.locals;
+
+// const { data: configData } = await fetchClient.api.config.get();
+
+const defaultOrder = [1, 2, 3, 4];
+const configData = {
+    sequence: [1, 2, 3, 4],
+};
+
+const componentMap = {
+    1: Marquee,
+    2: HeroSection,
+    3: Carousel,
+    4: List,
+};
+---
+
+<div class="w-full h-full">
+    {
+        configData
+            ? configData.sequence.map((index: number) => {
+                  const Component =
+                      componentMap[index as keyof typeof componentMap];
+                  return Component && <Component />;
+              })
+            : defaultOrder.map((index) => {
+                  const Component =
+                      componentMap[index as keyof typeof componentMap];
+                  return Component && <Component />;
+              })
+    }
+</div>

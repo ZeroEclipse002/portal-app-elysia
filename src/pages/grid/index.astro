@@ -1,0 +1,29 @@
+---
+import GridEditor from "@/components/GridEditor";
+import { GridPreview } from "@/components/GridPreview";
+import { db } from "@/db";
+import Layout from "@/layouts/Layout.astro";
+
+if (Astro.locals.user) {
+  Astro.redirect("/");
+}
+
+if (Astro.locals.user?.role !== "admin") {
+  Astro.redirect("/");
+}
+
+const grid = await db.query.sectionSequence.findFirst({
+  where: (table, { eq }) => eq(table.id, "1"),
+});
+---
+
+<Layout>
+  <div class="min-h-screen">
+    <div class="grid grid-cols-12 gap-6 p-8">
+      <GridPreview preLayout={grid?.sequence || [1, 2, 3, 4]} client:only />
+      <div class="col-span-9">
+        <GridEditor preLayout={grid?.sequence || [1, 2, 3, 4]} client:only />
+      </div>
+    </div>
+  </div>
+</Layout>

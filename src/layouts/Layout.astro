@@ -1,0 +1,36 @@
+---
+import { MainHeader } from "@/components/Header";
+import "@/styles/globals.css";
+import "node_modules/sonner/dist/styles.css";
+import { ClientRouter } from "astro:transitions";
+import { Toaster } from "@/components/ui/sonner";
+import NoticeBar from "@/components/NoticeBar.astro";
+const status = Astro.locals.user?.role ?? null;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <ClientRouter />
+    <title>Portal</title>
+  </head>
+  <body>
+    <NoticeBar />
+    <MainHeader role={status} pathname={Astro.url.pathname} client:load />
+    <Toaster transition:persist client:only />
+    <slot />
+  </body>
+</html>
+
+<style>
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+  }
+</style>

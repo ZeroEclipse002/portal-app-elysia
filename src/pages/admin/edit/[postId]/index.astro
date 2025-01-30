@@ -1,0 +1,43 @@
+---
+import { AdvancedEditor } from "@/components/Editor";
+import { EditorBar } from "@/components/EditorBar";
+import { EditorProvider } from "@/components/EditorContext";
+import { EditSidebar } from "@/components/EditSidebar";
+import { Separator } from "@/components/ui/separator";
+import { db } from "@/db";
+import Layout from "@/layouts/Layout.astro";
+
+if (!Astro.params.postId) {
+  return Astro.redirect("/admin");
+}
+
+const PostDetails = await db.query.posts.findFirst({
+  where: (table, { eq }) => eq(table.id, Astro.params.postId as string),
+});
+
+const PostContent = await db.query.postContent.findFirst({
+  where: (table, { eq }) => eq(table.postId, Astro.params.postId as string),
+});
+
+if (!PostDetails) {
+  return Astro.redirect("/admin");
+}
+
+if (PostDetails.deletedAt) {
+  return Astro.redirect("/admin");
+}
+---
+
+<Layout>
+  <div class="flex min-h-[calc(100vh-100px)] bg-gray-50">
+    <div class="flex-1 p-8 bg-white shadow-lg rounded-lg m-4">
+      <EditorBar
+        post={PostDetails}
+        postCont={PostContent ?? null}
+        client:only="react"
+      />
+      <AdvancedEditor post={PostContent ?? null} client:only="react" />
+    </div>
+    <EditSidebar post={PostDetails} client:only="react" />
+  </div>
+</Layout>
