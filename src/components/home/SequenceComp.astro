@@ -7,12 +7,9 @@ import Marquee from "@/components/home/Marquee.astro";
 import { fetchClient } from "@/lib/utils";
 const data = Astro.locals;
 
-// const { data: configData } = await fetchClient.api.config.get();
+const { data: configData } = await fetchClient.api.config.get();
 
 const defaultOrder = [1, 2, 3, 4];
-const configData = {
-    sequence: [1, 2, 3, 4],
-};
 
 const componentMap = {
     1: Marquee,
