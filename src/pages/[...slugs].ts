@@ -9,9 +9,22 @@ import { getConfig, getRecentPosts, getPriorityPosts, getPostContent } from '@/d
 
 class MemoryCache {
     private cache: Map<string, { value: any, expiry: number }>;
+    private cleanupInterval: number;
+    private intervalId: NodeJS.Timeout;
 
-    constructor() {
+    constructor(cleanupInterval = 60000) { // Default cleanup every minute
         this.cache = new Map();
+        this.cleanupInterval = cleanupInterval;
+        this.intervalId = setInterval(() => this.cleanup(), this.cleanupInterval);
+    }
+
+    private cleanup() {
+        const now = Date.now();
+        for (const [key, item] of this.cache.entries()) {
+            if (now > item.expiry) {
+                this.cache.delete(key);
+            }
+        }
     }
 
     async get(key: string) {
@@ -33,6 +46,11 @@ class MemoryCache {
 
     async del(key: string) {
         this.cache.delete(key);
+    }
+
+    // Clean up the interval when the cache is no longer needed
+    destroy() {
+        clearInterval(this.intervalId);
     }
 }
 
@@ -79,13 +97,19 @@ const isBusinessHours = () => {
     return hours >= 8 && hours < 20;
 }
 
-const getTTL = (type: 'recent' | 'priority') => {
+const getTTL = (type: 'recent' | 'priority' | 'config' | 'post') => {
     const isWorkHours = isBusinessHours();
 
-    if (type === 'recent') {
-        return isWorkHours ? 300 : 1800; // 5 mins during business hours, 30 mins otherwise
+    switch (type) {
+        case 'recent':
+            return isWorkHours ? 300 : 1800; // 5 mins during business hours, 30 mins otherwise
+        case 'priority':
+            return isWorkHours ? 900 : 3600; // 15 mins during business hours, 1 hour otherwise
+        case 'config':
+            return isWorkHours ? 1800 : 7200; // 30 mins during business hours, 2 hours otherwise
+        case 'post':
+            return isWorkHours ? 3600 : 14400; // 1 hour during business hours, 4 hours otherwise
     }
-    return isWorkHours ? 900 : 3600; // 15 mins during business hours, 1 hour otherwise
 }
 
 const app = new Elysia()
@@ -97,7 +121,11 @@ const app = new Elysia()
         .get("/user", ({ user, session }) => userInfo(user, session))
         .get("/test", () => 'hi')
         .get("/config", async () => {
+            const cached = await cache.get('config');
+            if (cached) return cached;
+
             const config = await getConfig.execute();
+            await cache.set('config', config, { ex: getTTL('config') });
             return config;
         })
         .get("/feed", async () => {
@@ -120,23 +148,18 @@ const app = new Elysia()
             }
         })
         .get("/feed/post/:postId", async ({ params }) => {
+            const cacheKey = `post:${params.postId}`;
+            const cached = await cache.get(cacheKey);
+            if (cached) return cached;
+
             const post = await getPostContent.execute({ postId: params.postId as string });
 
-            console.log('post', post)
+            const response = {
+                content: post?.content ?? null
+            };
 
-            if (!post) {
-                return new Response(JSON.stringify({ content: null }), {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-            }
-
-            return new Response(JSON.stringify({ content: post.content }), {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
+            await cache.set(cacheKey, response, { ex: getTTL('post') });
+            return response;
         })
         .post("/feed/cache/invalidate", async ({ user }) => {
             if (!user) {
@@ -145,7 +168,9 @@ const app = new Elysia()
 
             await Promise.all([
                 cache.del('recent'),
-                cache.del('priority')
+                cache.del('priority'),
+                cache.del('config')
+                // Note: We don't invalidate individual post caches here as they're less frequently updated
             ]);
 
             return { success: true, message: 'Cache invalidated successfully' };
