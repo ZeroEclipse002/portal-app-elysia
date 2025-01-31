@@ -31,3 +31,7 @@ export const getPostContent = db.query.postContent.findFirst({
 export const getPost = db.query.posts.findFirst({
     where: (table, { eq, sql }) => eq(table.id, sql.placeholder('postId')),
 }).prepare('getPost')
+
+export const getUserFamily = db.query.familyData.findFirst({
+    where: (table, { eq, sql }) => eq(table.userId, sql.placeholder("userId"))
+}).prepare('getUserFamily')

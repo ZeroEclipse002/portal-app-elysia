@@ -1,5 +1,12 @@
 import { relations, sql } from "drizzle-orm";
-import { pgTable, text, integer, timestamp, boolean, pgEnum, check, unique, jsonb, serial } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, timestamp, boolean, pgEnum, check, unique, jsonb, serial, uuid } from "drizzle-orm/pg-core";
+
+export type FamilyData = {
+    fullName: string;
+    birthDate: string;
+    gender: string;
+    relationship: string;
+}
 
 export const postType = pgEnum("post_type", ["announcement", "news"]);
 
@@ -14,6 +21,19 @@ export const user = pgTable("user", {
     createdAt: timestamp('created_at').notNull(),
     updatedAt: timestamp('updated_at').notNull()
 });
+
+export const userDetails = pgTable("user_details", {
+    id: serial("id").primaryKey(),
+    userId: text("user_id").references(() => user.id, { onDelete: 'set null' }).unique(),
+    firstName: text("first_name"),
+    lastName: text("last_name"),
+    phone: text("phone"),
+    address: text("address"),
+    birthDate: text("birth_date"),
+    gender: text("gender"),
+    createdAt: timestamp("created_at").notNull(),
+    updatedAt: timestamp("updated_at").notNull()
+})
 
 export const session = pgTable("session", {
     id: text("id").primaryKey(),
@@ -51,6 +71,13 @@ export const verification = pgTable("verification", {
     updatedAt: timestamp('updated_at'),
 });
 
+export const familyData = pgTable("family_data", {
+    id: serial("id").primaryKey(),
+    userId: text("user_id").references(() => user.id, { onDelete: 'set null' }).unique(),
+    data: jsonb("data").$type<FamilyData[]>().notNull(),
+    createdAt: timestamp("created_at").notNull(),
+    updatedAt: timestamp("updated_at").notNull()
+})
 
 export const posts = pgTable("posts", (t) => ({
     id: t.text("id").primaryKey(),
@@ -81,6 +108,26 @@ export const priority = pgTable("priority", (t) => ({
     }]
 )
 
+export const requests = pgTable("requests", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id").references(() => user.id, { onDelete: 'set null' }),
+    type: text("type", { enum: ['inquiry', 'request', 'report'] }).notNull(),
+    status: text("status", { enum: ['submitted', 'reviewed', 'approved', 'rejected'] }).notNull(),
+    createdAt: timestamp("created_at").notNull()
+})
+
+export const requestUpdates = pgTable("request_updates", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    requestId: uuid("request_id").references(() => requests.id, { onDelete: 'set null' }),
+    message: text("message").notNull(),
+    type: text("type", { enum: ['urgent', 'normal'] }).notNull(),
+    createdAt: timestamp("created_at").notNull()
+})
+
+export const sectionSequence = pgTable("section_sequence", {
+    id: text("id").primaryKey(),
+    sequence: integer("sequence").array().notNull().default([1, 2, 3, 4]),
+})
 
 export const postRelations = relations(posts, ({ one }) => ({
     user: one(user, {
@@ -103,10 +150,22 @@ export const priorityRelations = relations(priority, ({ one }) => ({
     })
 }))
 
-export const sectionSequence = pgTable("section_sequence", {
-    id: text("id").primaryKey(),
-    sequence: integer("sequence").array().notNull().default([1, 2, 3, 4]),
-})
+export const requestRelations = relations(requests, ({ one, many }) => ({
+    user: one(user, {
+        fields: [requests.userId],
+        references: [user.id]
+    }),
+    updates: many(requestUpdates)
+}))
+
+export const requestUpdateRelations = relations(requestUpdates, ({ one }) => ({
+    request: one(requests, {
+        fields: [requestUpdates.requestId],
+        references: [requests.id]
+    })
+}))
+
+
 
 
 export type Post = typeof posts.$inferSelect

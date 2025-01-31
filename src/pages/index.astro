@@ -2,12 +2,12 @@
 import { fetchClient } from "@/lib/utils";
 import Layout from "../layouts/Layout.astro";
 import SequenceComp from "@/components/home/SequenceComp.astro";
+import InitialModal from "@/components/InitialModal.astro";
 const data = Astro.locals;
-
-const { data: dataUser } = await fetchClient.api.test.get();
 ---
 
 <Layout>
+  <InitialModal server:defer />
   <SequenceComp server:defer>
     <div slot="fallback" class="w-full h-full bg-slate-50 overflow-x-hidden">
       <div

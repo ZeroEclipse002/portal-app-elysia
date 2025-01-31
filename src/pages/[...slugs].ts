@@ -5,7 +5,7 @@ import { auth } from '@/lib/auth';
 import type { User } from 'better-auth';
 import type { Session } from 'better-auth';
 import { cron, Patterns } from '@elysiajs/cron';
-import { getConfig, getRecentPosts, getPriorityPosts, getPostContent } from '@/db/queries';
+import { getConfig, getRecentPosts, getPriorityPosts, getPostContent, getUserFamily } from '@/db/queries';
 
 class MemoryCache {
     private cache: Map<string, { value: any, expiry: number }>;
@@ -180,6 +180,21 @@ const app = new Elysia()
                 tags: ['Cache Management'],
                 security: [{ BearerAuth: [] }],
                 description: 'Invalidate the feed cache. Requires authentication.'
+            }
+        })
+        .get("/initialconfig", async ({ user }) => {
+            if (user) {
+
+                const userDetails = await getUserFamily.execute({ userId: user.id });
+
+                return {
+                    hasInitialDetails: userDetails ? true : false
+                }
+
+            }
+
+            return {
+                hasInitialDetails: false
             }
         })
     )
