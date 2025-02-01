@@ -6,14 +6,6 @@ import { useState, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 
-// interface FamilyData {
-//     id: number;
-//     fullName: string;
-//     birthDate: string;
-//     gender: string;
-//     relationship: string;
-// }
-
 const InitialModalClient = ({ path }: { path: string }) => {
     const [nestedModal, setNestedModal] = useState<boolean>(false);
     const [familyMembers, setFamilyMembers] = useState<FamilyData[]>([]);

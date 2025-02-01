@@ -8,11 +8,19 @@ import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { toast } from "sonner";
 import { useState } from "react";
+import { TrashIcon } from "lucide-react";
+import useSWR, { useSWRConfig } from "swr";
 
-export const PriorityPostsTable = ({ priorityPosts, posts }: { priorityPosts: PriorityPostWithPost[], posts: Post[] }) => {
+const fetcher = (url: string) => fetch(url).then(res => res.json())
+
+export const PriorityPostsTable = () => {
 
     const [postId, setPostId] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
+    const [open, setOpen] = useState(false)
+
+    const { data: postArray } = useSWR<{ posts: Post[], priorityPosts: PriorityPostWithPost[] }>('/api/adminposts', fetcher)
+    const { mutate } = useSWRConfig()
 
     async function addPriority() {
 
@@ -42,6 +50,39 @@ export const PriorityPostsTable = ({ priorityPosts, posts }: { priorityPosts: Pr
                 return 'Failed to add priority'
             }
         })
+
+        mutate('/api/adminposts')
+    }
+
+
+    async function removePriority(postId: string) {
+        const handler = actions.admin.managePriority({
+            mode: 'remove',
+            postId: postId,
+        })
+
+        toast.promise(handler, {
+            loading: 'Removing priority',
+            success: 'Priority removed',
+            error: 'Failed to remove priority',
+        })
+
+        mutate('/api/adminposts')
+    }
+
+    if (!postArray) {
+        return (
+            <div className="flex flex-col gap-4">
+                <div className="animate-pulse">
+                    <div className="h-10 w-32 bg-slate-200 rounded mb-4" />
+                    <div className="space-y-3">
+                        <div className="h-12 bg-slate-200 rounded" />
+                        <div className="h-12 bg-slate-200 rounded" />
+                        <div className="h-12 bg-slate-200 rounded" />
+                    </div>
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -70,7 +111,7 @@ export const PriorityPostsTable = ({ priorityPosts, posts }: { priorityPosts: Pr
                                     <SelectValue placeholder="Select a post" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {posts.map((post) => (
+                                    {postArray?.posts.filter((post) => !postArray?.priorityPosts.some((priorityPost) => priorityPost.postId === post.id)).map((post) => (
                                         <SelectItem key={post.id} value={post.id}>{post.title}</SelectItem>
                                     ))}
                                 </SelectContent>
@@ -87,13 +128,19 @@ export const PriorityPostsTable = ({ priorityPosts, posts }: { priorityPosts: Pr
                     <TableRow>
                         <TableHead>Title</TableHead>
                         <TableHead>Priority</TableHead>
+                        <TableHead>Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {priorityPosts.map((post, index) => (
+                    {postArray?.priorityPosts.map((post, index) => (
                         <TableRow key={index}>
                             <TableCell>{post.post.title}</TableCell>
                             <TableCell>{post.priority}</TableCell>
+                            <TableCell>
+                                <Button onClick={() => removePriority(post.postId)} variant="destructive" size="icon">
+                                    <TrashIcon className="w-4 h-4" />
+                                </Button>
+                            </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

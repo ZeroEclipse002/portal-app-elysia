@@ -1,62 +1,113 @@
 ---
-interface Props {
-  data?: {
-    items?: string[];
-  };
-}
+import { fetchClient } from "@/lib/utils";
+import { Info } from "lucide-react";
 
-const { data } = Astro.props;
-const items = data?.items || ["Marquee Content"];
+const { data: items } = await fetchClient.api.marquee.get();
+const posts = items?.latestAnnouncementAndNews?.rows || [];
+
+// Format date to be more readable
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
 ---
 
-<div class="w-full bg-white/80 backdrop-blur-sm py-6">
-  <div class="container mx-auto max-w-7xl px-8">
-    <div class="marquee-container">
-      <div class="marquee-content">
-        {
-          items.map((item) => (
-            <span class="mx-8 text-base font-medium text-gray-600 hover:text-gray-900 transition-all duration-300 hover:scale-105">
-              {item}
-            </span>
-          ))
-        }
+<section class="marquee-section">
+  {
+    posts.length > 0 ? (
+      <div class="marquee-wrapper">
+        <div class="icon-wrapper">
+          <Info className="text-primary h-5 w-5" />
+        </div>
+        <div class="marquee-container">
+          <div class="marquee-track">
+            <div class="marquee-content">
+              {posts.map((post: any) => (
+                <div class="news-item">
+                  <span class="news-type">{post.type}</span>
+                  <span class="news-title">{post.title}</span>
+                  <span class="news-date">{formatDate(post.created_at)}</span>
+                </div>
+              ))}
+            </div>
+            <div class="marquee-content" aria-hidden="true">
+              {posts.map((post: any) => (
+                <div class="news-item">
+                  <span class="news-type">{post.type}</span>
+                  <span class="news-title">{post.title}</span>
+                  <span class="news-date">{formatDate(post.created_at)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="marquee-content" aria-hidden="true">
-        {
-          items.map((item) => (
-            <span class="mx-8 text-base font-medium text-gray-600 hover:text-gray-900 transition-all duration-300 hover:scale-105">
-              {item}
-            </span>
-          ))
-        }
-      </div>
-    </div>
-  </div>
-</div>
+    ) : (
+      <p class="text-center text-gray-500 italic">No announcements available</p>
+    )
+  }
+</section>
 
 <style>
+  .marquee-section {
+    @apply py-6 bg-gray-50;
+  }
+
+  .marquee-wrapper {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-6;
+  }
+
+  .icon-wrapper {
+    @apply flex-shrink-0;
+  }
+
   .marquee-container {
-    position: relative;
-    width: 100%;
-    overflow: hidden;
+    @apply relative overflow-hidden w-full;
     mask-image: linear-gradient(
       to right,
-      transparent,
-      black 10%,
-      black 90%,
-      transparent
+      transparent 0%,
+      black 5%,
+      black 95%,
+      transparent 100%
     );
   }
 
-  .marquee-content {
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-    animation: marquee 30s linear infinite;
-    transform: translateX(100%);
+  .marquee-track {
+    @apply flex whitespace-nowrap;
   }
 
-  @keyframes marquee {
+  .marquee-content {
+    @apply flex items-center py-2;
+    animation: scroll 30s linear infinite;
+    animation-delay: -30s;
+  }
+
+  .marquee-content:nth-child(2) {
+    animation: scroll2 30s linear infinite;
+  }
+
+  .news-item {
+    @apply inline-flex items-center mx-8;
+    gap: 1rem;
+  }
+
+  .news-type {
+    @apply px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary;
+  }
+
+  .news-title {
+    @apply text-sm font-medium text-gray-900;
+  }
+
+  .news-date {
+    @apply text-sm text-gray-500;
+  }
+
+  @keyframes scroll {
     0% {
       transform: translateX(100%);
     }
@@ -65,7 +116,18 @@ const items = data?.items || ["Marquee Content"];
     }
   }
 
-  .marquee-content:hover {
+  @keyframes scroll2 {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-200%);
+    }
+  }
+
+  /* Smooth pause on hover */
+  .marquee-container:hover .marquee-content {
     animation-play-state: paused;
+    transition: all 0.3s ease;
   }
 </style>

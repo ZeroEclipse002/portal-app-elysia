@@ -120,13 +120,21 @@ export function HeroSectionContent({ recent, priority, initialData }: HeroSectio
                         </div>
                         <h1 style={{
                             viewTransitionName: "post-title-" + data.id
-                        }} className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 bg-clip-text text-transparent leading-tight">
+                        }} className={cn(
+                            "text-5xl md:text-7xl font-bold bg-clip-text text-transparent leading-tight",
+                            data.type === "announcement"
+                                ? "bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600"
+                                : "bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600"
+                        )}>
                             {data.title}
                         </h1>
 
                         <Badge
                             variant="outline"
-                            className="text-lg md:text-2xl text-slate-600 max-w-3xl text-center font-light tracking-wide px-6 py-3"
+                            className={cn(
+                                "text-lg md:text-2xl max-w-3xl text-center font-light tracking-wide px-6 py-3",
+                                data.type === "announcement" ? "text-purple-700" : "text-teal-700"
+                            )}
                         >
                             {data.shortDescription || "No short description available"}
                         </Badge>
@@ -134,16 +142,26 @@ export function HeroSectionContent({ recent, priority, initialData }: HeroSectio
                         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
                             <a
                                 href={data.id ? `/post/${data.id}` : "#"}
-                                className="group px-8 py-4 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-full hover:from-slate-800 hover:to-slate-700 transition-all duration-300 shadow-lg hover:shadow-xl text-lg hover:scale-105"
+                                className={cn(
+                                    "group px-8 py-4 text-white rounded-full transition-all duration-300 shadow-lg hover:shadow-xl text-lg hover:scale-105",
+                                    data.type === "announcement"
+                                        ? "bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500"
+                                        : "bg-gradient-to-br from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500"
+                                )}
                             >
                                 Visit {data.type}
                                 <span className="inline-block transition-transform group-hover:translate-x-1 ml-2">→</span>
                             </a>
                             <a
                                 href={data.id || "#"}
-                                className="px-8 py-4 bg-white/50 backdrop-blur-sm border border-slate-200 rounded-full hover:bg-white hover:border-slate-300 transition-all duration-300 shadow-sm hover:shadow-md text-lg text-slate-700 hover:scale-105"
+                                className={cn(
+                                    "px-8 py-4 bg-white/50 backdrop-blur-sm border rounded-full hover:bg-white transition-all duration-300 shadow-sm hover:shadow-md text-lg hover:scale-105",
+                                    data.type === "announcement"
+                                        ? "border-purple-200 hover:border-purple-300 text-purple-700"
+                                        : "border-teal-200 hover:border-teal-300 text-teal-700"
+                                )}
                             >
-                                Learn More
+                                View more {data.type}
                             </a>
                         </div>
                     </div>

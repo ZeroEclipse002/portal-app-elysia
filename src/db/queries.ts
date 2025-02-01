@@ -1,6 +1,6 @@
 import { db } from ".";
 import { sectionSequence } from "./schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 
 
@@ -35,3 +35,51 @@ export const getPost = db.query.posts.findFirst({
 export const getUserFamily = db.query.familyData.findFirst({
     where: (table, { eq, sql }) => eq(table.userId, sql.placeholder("userId"))
 }).prepare('getUserFamily')
+
+export const getRequests = db.query.requests.findMany({
+    where: (table, { eq, sql }) => eq(table.userId, sql.placeholder("userId"))
+}).prepare('getRequests')
+
+export const getRequest = db.query.requests.findFirst({
+    where: (table, { eq, sql }) => eq(table.id, sql.placeholder("requestId"))
+}).prepare('getRequest')
+
+export const getAllRequests = db.query.requests.findMany({
+    orderBy: (table, { desc }) => desc(table.createdAt),
+    limit: sql.placeholder('limit'),
+    offset: sql.placeholder('offset'),
+}).prepare('getAllRequests')
+
+export const getRequestLogs = db.query.requestUpdates.findMany({
+    where: (table, { eq, sql }) => eq(table.requestId, sql.placeholder("requestId")),
+    orderBy: (table, { desc }) => desc(table.createdAt),
+}).prepare('getRequestLogs')
+
+
+export const getPosts = db.query.posts.findMany({
+    with: {
+        user: {
+            columns: {
+                name: true,
+            },
+        },
+        priority: {
+            columns: {
+                priority: true,
+            },
+        },
+    },
+}).prepare('getPosts')
+
+
+export const getHighlights = db.query.highlights.findMany().prepare('getHighlights')
+
+export const getDownloadableResources = db.query.downloadableContent.findMany().prepare('getDownloadableResources')
+
+export const getLatestAnnouncementAndNews = db.execute(sql`
+  SELECT * FROM (
+    (SELECT * FROM posts WHERE type = 'announcement' ORDER BY created_at DESC LIMIT 1)
+    UNION ALL
+    (SELECT * FROM posts WHERE type = 'news' ORDER BY created_at DESC LIMIT 1)
+  ) AS latest_posts
+`)

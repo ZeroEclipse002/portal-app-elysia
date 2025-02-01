@@ -1,0 +1,37 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { db } from "@/db";
+import Maindetails from "@/components/userdetails/maindetails.astro";
+import Additional from "@/components/userdetails/additional.astro";
+import Familymembers from "@/components/userdetails/familymembers.astro";
+
+const userId = Astro.params.userId;
+
+if (!userId) {
+    return Astro.redirect("/admin");
+}
+---
+
+<Layout>
+    <div
+        class="container max-w-full min-h-[calc(100vh-100px)] mx-auto p-8 md:p-12"
+    >
+        <h1 class="text-4xl font-bold text-slate-900 mb-8 tracking-tight">
+            User Profile
+        </h1>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column - Main Info & Additional Details */}
+            <div class="lg:col-span-2 space-y-6">
+                {/* Main User Details */}
+                <Maindetails userId={userId} server:defer />
+
+                {/* Additional Details Section */}
+                <Additional userId={userId} server:defer />
+            </div>
+
+            {/* Right Column - Family Members */}
+            <Familymembers userId={userId} server:defer />
+        </div>
+    </div>
+</Layout>

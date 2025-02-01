@@ -111,9 +111,11 @@ export const priority = pgTable("priority", (t) => ({
 export const requests = pgTable("requests", {
     id: uuid("id").primaryKey().defaultRandom(),
     userId: text("user_id").references(() => user.id, { onDelete: 'set null' }),
-    type: text("type", { enum: ['inquiry', 'request', 'report'] }).notNull(),
+    type: text("type").notNull(),
+    details: text("details").notNull(),
+    idPicture: text("id_picture").notNull(),
     status: text("status", { enum: ['submitted', 'reviewed', 'approved', 'rejected'] }).notNull(),
-    createdAt: timestamp("created_at").notNull()
+    createdAt: timestamp("created_at").notNull().defaultNow()
 })
 
 export const requestUpdates = pgTable("request_updates", {
@@ -121,7 +123,7 @@ export const requestUpdates = pgTable("request_updates", {
     requestId: uuid("request_id").references(() => requests.id, { onDelete: 'set null' }),
     message: text("message").notNull(),
     type: text("type", { enum: ['urgent', 'normal'] }).notNull(),
-    createdAt: timestamp("created_at").notNull()
+    createdAt: timestamp("created_at").notNull().defaultNow()
 })
 
 export const sectionSequence = pgTable("section_sequence", {
@@ -129,11 +131,51 @@ export const sectionSequence = pgTable("section_sequence", {
     sequence: integer("sequence").array().notNull().default([1, 2, 3, 4]),
 })
 
+export const highlights = pgTable("highlights", {
+    id: serial("id").primaryKey(),
+    image: text("image").notNull(),
+    link: text("link"),
+    caption: text("caption").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow()
+})
+
+export const downloadableContent = pgTable("downloadable_content", {
+    id: serial("id").primaryKey(),
+    fileLink: text("file").notNull(),
+    caption: text("caption").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow()
+})
+
+export const feedBack = pgTable("feed_back", {
+    id: serial("id").primaryKey(),
+    subject: text("subject").notNull(),
+    userId: text("user_id").references(() => user.id, { onDelete: 'set null' }),
+    message: text("message").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow()
+})
+
+
 export const postRelations = relations(posts, ({ one }) => ({
     user: one(user, {
         fields: [posts.userId],
         references: [user.id]
     }),
+    priority: one(priority, {
+        fields: [posts.id],
+        references: [priority.postId]
+    })
+}))
+
+export const userRelations = relations(user, ({ many }) => ({
+    posts: many(posts),
+    feedBack: many(feedBack)
+}))
+
+export const feedBackRelations = relations(feedBack, ({ one }) => ({
+    user: one(user, {
+        fields: [feedBack.userId],
+        references: [user.id]
+    })
 }))
 
 export const postContentRelations = relations(postContent, ({ one }) => ({
@@ -175,7 +217,10 @@ export interface PostWithUser extends Post {
         name: string
     }
 }
-
+export type HighlightsType = typeof highlights.$inferSelect
+export type DownloadableResourcesType = typeof downloadableContent.$inferSelect
+export type Ticket = typeof requests.$inferSelect
+export type TicketUpdate = typeof requestUpdates.$inferSelect
 export type PriorityPost = typeof priority.$inferSelect
 
 export interface PriorityPostWithPost extends Omit<PriorityPost, 'id'> {

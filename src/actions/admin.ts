@@ -1,9 +1,12 @@
 import { db } from "@/db";
-import { postContent, posts, priority, sectionSequence } from "@/db/schema";
+import { downloadableContent, highlights, postContent, posts, priority, requests, requestUpdates, sectionSequence, user } from "@/db/schema";
 import { generateId } from "@/lib/utils";
+import { utapi } from "@/utconfig/uploadthing";
 import { ActionError, defineAction, type ActionAPIContext } from "astro:actions";
 import { z } from "astro:schema";
 import { eq, inArray, sql, SQL } from "drizzle-orm";
+import { text } from "drizzle-orm/mysql-core";
+import { UTFile } from "uploadthing/server";
 
 export const admin = {
     createPost: defineAction({
@@ -311,7 +314,6 @@ export const admin = {
             }
 
             if (input.mode === 'arrange') {
-
                 if (!input.priority) {
                     throw new ActionError({
                         code: 'BAD_REQUEST',
@@ -320,14 +322,13 @@ export const admin = {
                 }
 
                 const sqlChunks: SQL[] = []
-
                 const ids: string[] = [];
+
                 sqlChunks.push(sql`(case`);
                 for (const prio of input.priority) {
-                    sqlChunks.push(sql`when ${priority.id} = ${prio.id} then ${prio.priority}`);
+                    sqlChunks.push(sql`when post_id = ${prio.id} then ${prio.priority}`);
                     ids.push(prio.id);
                 }
-
                 sqlChunks.push(sql`end)`);
 
                 const finalSql: SQL = sql.join(sqlChunks, sql.raw(' '));
@@ -343,11 +344,164 @@ export const admin = {
                     })
                 }
 
+                await fetch('/api/feed/cache/invalidate', {
+                    method: 'POST',
+                    headers: Object.fromEntries(context.request.headers.entries())
+                })
+
                 return {
                     success: true,
                     data: data
                 }
             }
+        }
+    }),
+    approveUser: defineAction({
+        accept: 'json',
+        input: z.object({
+            userId: z.string(),
+            approved: z.boolean()
+        }),
+        handler: async (input, context) => {
+            authMiddleware(context)
+
+            const userDetails = await db.update(user).set({
+                approved: input.approved
+            }).where(eq(user.id, input.userId)).returning()
+
+            if (!userDetails) {
+                throw new ActionError({
+                    code: 'NOT_FOUND',
+                    message: 'User not found'
+                })
+            }
+
+            return {
+                success: true,
+                userDetails: userDetails
+            }
+        }
+    }),
+    addRequestUpdate: defineAction({
+        accept: 'json',
+        input: z.object({
+            requestId: z.string(),
+            message: z.string(),
+            type: z.enum(['urgent', 'normal']),
+            status: z.enum(['submitted', 'reviewed', 'approved', 'rejected'])
+        }),
+        handler: async (input, context) => {
+            authMiddleware(context)
+
+            const reqUpdate = await db.transaction(async (tx) => {
+
+                const [request] = await tx.select().from(requests).where(eq(requests.id, input.requestId))
+
+                if (!request) {
+                    throw new ActionError({
+                        code: 'NOT_FOUND',
+                        message: 'Request not found'
+                    })
+                }
+
+                const [reqUp] = await tx.insert(requestUpdates).values({
+                    requestId: input.requestId,
+                    message: input.message,
+                    type: input.type,
+                }).returning()
+
+                if (input.status !== request.status) {
+                    await tx.update(requests).set({
+                        status: input.status
+                    }).where(eq(requests.id, input.requestId))
+                }
+
+                return {
+                    success: true,
+                    requestUpdate: reqUp
+                }
+
+            })
+
+            return reqUpdate
+
+        }
+    }),
+    addHighlight: defineAction({
+        accept: 'json',
+        input: z.object({
+            image: z.string().regex(/^https?:\/\/.+/),
+            caption: z.string(),
+            link: z.string().regex(/^https?:\/\/.+/).optional()
+        }),
+        handler: async (input, context) => {
+            authMiddleware(context)
+
+            const [highl] = await db.insert(highlights).values({
+                image: input.image,
+                caption: input.caption,
+                link: input.link || null
+            }).returning()
+
+            if (!highl) {
+                throw new ActionError({
+                    code: 'INTERNAL_SERVER_ERROR',
+                    message: 'Failed to add highlight'
+                })
+            }
+
+            return {
+                success: true,
+                highlight: highl
+            }
+
+        }
+    }),
+    addDownloadableResource: defineAction({
+        accept: 'form',
+        input: z.object({
+            file: z.instanceof(File).refine(file => file.type === 'application/pdf' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', {
+                message: 'Please provide a PDF or DOCX file'
+            }),
+            caption: z.string()
+        }),
+        handler: async (input, context) => {
+            authMiddleware(context)
+
+            const downloadableResource = await db.transaction(async (tx) => {
+
+                const fileLink = await utapi.uploadFiles(new UTFile([input.file], input.file.name, { type: input.file.type }))
+
+                if (!fileLink.data) {
+                    throw new ActionError({
+                        code: 'INTERNAL_SERVER_ERROR',
+                        message: 'Failed to upload file'
+                    })
+                }
+
+                const getUrl = await utapi.getSignedURL(fileLink.data.key)
+
+                if (!getUrl.url) {
+                    throw new ActionError({
+                        code: 'INTERNAL_SERVER_ERROR',
+                        message: 'Failed to get signed URL'
+                    })
+                }
+
+                const [downloadableResource] = await db.insert(downloadableContent).values({
+                    fileLink: getUrl.url,
+                    caption: input.caption
+                }).returning()
+
+                return {
+                    success: true,
+                    downloadableResource: downloadableResource
+                }
+
+            })
+
+            return downloadableResource
+
         }
     })
 }

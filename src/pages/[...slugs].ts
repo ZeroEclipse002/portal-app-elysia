@@ -5,7 +5,9 @@ import { auth } from '@/lib/auth';
 import type { User } from 'better-auth';
 import type { Session } from 'better-auth';
 import { cron, Patterns } from '@elysiajs/cron';
-import { getConfig, getRecentPosts, getPriorityPosts, getPostContent, getUserFamily } from '@/db/queries';
+import { getConfig, getRecentPosts, getPriorityPosts, getPostContent, getUserFamily, getRequests, getRequest, getRequestLogs, getPosts, getAllRequests, getHighlights, getDownloadableResources, getLatestAnnouncementAndNews } from '@/db/queries';
+import { utapi } from '@/utconfig/uploadthing';
+import _ from 'lodash';
 
 class MemoryCache {
     private cache: Map<string, { value: any, expiry: number }>;
@@ -169,7 +171,8 @@ const app = new Elysia()
             await Promise.all([
                 cache.del('recent'),
                 cache.del('priority'),
-                cache.del('config')
+                cache.del('config'),
+                cache.del('request'),
                 // Note: We don't invalidate individual post caches here as they're less frequently updated
             ]);
 
@@ -196,6 +199,140 @@ const app = new Elysia()
             return {
                 hasInitialDetails: false
             }
+        })
+        .get("/requests", async ({ user }) => {
+
+            if (!user) {
+                console.log('Unauthorized');
+                throw new Error('Unauthorized');
+            }
+
+            const requests = await getRequests.execute({ userId: user.id });
+
+
+            return requests;
+        })
+        .get("/request/:requestId", async ({ params, user }) => {
+            if (!params.requestId) {
+                throw new Error('Request ID is required');
+            }
+
+            if (!user) {
+                throw new Error('Unauthorized');
+            }
+
+            const request = await getRequest.execute({ requestId: params.requestId as string })
+
+            if (!request) {
+                throw new Error('Request not found');
+            }
+
+            const pictureUrl = await utapi.getSignedURL(request.idPicture, {
+                expiresIn: 60 * 60
+            })
+
+            const cacheKey = `request:${params.requestId}`;
+            const cached = await cache.get(cacheKey);
+
+            if (cached) {
+                return {
+                    request: {
+                        ...cached.request,
+                        status: request.status
+                    }
+                };
+            }
+
+            const response = {
+                request: {
+                    ..._.omit(request, ['idPicture', 'status']),
+                    idPicture: pictureUrl
+                }
+            };
+
+            await cache.set(cacheKey, response, { ex: 3600 }); // Cache for 1 hour
+
+            return {
+                request: {
+                    ...response.request,
+                    status: request.status
+                }
+            };
+        })
+        .get("/requestlogs/:requestId", async ({ params, user }) => {
+            if (!params.requestId) {
+                throw new Error('Request ID is required');
+            }
+
+            if (!user) {
+                throw new Error('Unauthorized');
+            }
+
+            const requestLogs = await getRequestLogs.execute({ requestId: params.requestId as string })
+
+            console.log(requestLogs);
+
+            return {
+                requestLogs: requestLogs
+            };
+
+        })
+        .get("/adminposts", async ({ user }) => {
+            if (!user) {
+                throw new Error('Unauthorized');
+            }
+
+            if (user.role !== 'admin') {
+                throw new Error('Unauthorized');
+            }
+
+            const posts = await getPosts.execute();
+
+            const priorityPosts = posts
+                .filter((post) => post.priority)
+                .map((post) => ({
+                    postId: post.id,
+                    priority: post.priority?.priority ?? 0,
+                    post: {
+                        title: post.title,
+                    },
+                }));
+
+            return {
+                posts: posts,
+                priorityPosts: priorityPosts
+            };
+        })
+        .get("/adminrequests", async ({ user, query }) => {
+            if (!user) {
+                throw new Error('Unauthorized');
+            }
+
+            if (user.role !== 'admin') {
+                throw new Error('Unauthorized');
+            }
+
+            const page: number = parseInt(query.page || '1');
+
+            const requests = await getAllRequests.execute({ limit: 10, offset: (page - 1) * 10 });
+
+            return requests;
+        })
+        .get("/highlights", async () => {
+            const highlights = await getHighlights.execute();
+            return highlights;
+        })
+        .get("/downloadable-resources", async () => {
+            const downloadableResources = await getDownloadableResources.execute();
+            return downloadableResources;
+        })
+        .get("/marquee", async () => {
+            // Query the latest highlight, news, and announcement
+            const latestAnnouncementAndNews = await getLatestAnnouncementAndNews.execute();
+
+            return {
+                latestAnnouncementAndNews: _.pick(latestAnnouncementAndNews, ['rows'])
+            };
         })
     )
 

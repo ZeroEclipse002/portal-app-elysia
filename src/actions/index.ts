@@ -1,10 +1,12 @@
 import { db } from "@/db";
-import { familyData, sectionSequence, user, userDetails } from "@/db/schema";
+import { familyData, requests, sectionSequence, user, userDetails } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { ActionError, defineAction, type ActionAPIContext } from "astro:actions";
 import { z } from "astro:schema";
-import { eq } from "drizzle-orm";
+import { and, arrayContains, eq, or } from "drizzle-orm";
 import { admin } from "./admin";
+import { utapi } from "@/utconfig/uploadthing";
+import { UTFile } from "uploadthing/server";
 
 
 export const server = {
@@ -105,6 +107,86 @@ export const server = {
 
             return {
                 success: true
+            }
+        }
+    }),
+    createRequest: defineAction({
+        accept: 'form',
+        input: z.object({
+            requestType: z.string(),
+            otherRequestType: z.string().optional(),
+            requestDetails: z.string().optional(),
+            idPicture: z.instanceof(File).refine(file => file.type.startsWith('image/') && file.size <= 1 * 1024 * 1024, {
+                message: 'Please upload a valid image file (max 1MB)'
+            }),
+        }).refine(data => data.requestType === 'other' ? !!data.otherRequestType : true, {
+            message: 'Please specify the type of request',
+            path: ['otherRequestType']
+        }),
+        handler: async (input, context) => {
+            try {
+                if (!input.idPicture.type.startsWith('image/')) {
+                    throw new ActionError({
+                        code: 'BAD_REQUEST',
+                        message: 'Please upload a valid image file'
+                    });
+                }
+
+                if (input.idPicture.size > 1 * 1024 * 1024) {
+                    throw new ActionError({
+                        code: 'BAD_REQUEST',
+                        message: 'File size must be less than 1MB'
+                    });
+                }
+
+                AuthMiddleware(context)
+
+                console.log('Request received:', {
+                    ...input,
+                    idPicture: {
+                        type: input.idPicture.type,
+                        size: input.idPicture.size
+                    }
+                })
+
+                const dataRes = await db.transaction(async tx => {
+
+                    const reqNumber = await tx.$count(requests, and(eq(requests.userId, context.locals.user?.id as string), or(eq(requests.status, 'submitted'), eq(requests.status, 'reviewed'))))
+
+                    if (reqNumber >= 3) {
+                        throw new ActionError({
+                            code: 'BAD_REQUEST',
+                            message: 'You have reached the maximum number of requests'
+                        })
+                    }
+
+                    const idPic = await utapi.uploadFiles(new UTFile([input.idPicture], input.idPicture.name, { type: input.idPicture.type }))
+
+                    if (!idPic.data) {
+                        throw new ActionError({
+                            code: 'BAD_REQUEST',
+                            message: 'Failed to upload image'
+                        })
+                    }
+
+                    const request = await tx.insert(requests).values({
+                        type: input.requestType,
+                        details: input.requestDetails ?? '',
+                        status: 'submitted',
+                        idPicture: idPic.data.key,
+                        userId: context.locals.user?.id,
+                        createdAt: new Date(),
+                    })
+
+                    return {
+                        success: true,
+                        message: 'Request submitted successfully'
+                    }
+
+                })
+            } catch (error) {
+                console.error('Error processing request:', error)
+                throw error
             }
         }
     }),

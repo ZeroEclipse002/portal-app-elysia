@@ -4,88 +4,106 @@ import { PostsTable } from "@/components/PostsTable";
 import Layout from "@/layouts/Layout.astro";
 import { db } from "@/db";
 import { PriorityPostsTable } from "@/components/PriorityPostsTable";
+import { RequestsTable } from "@/components/requests/RequestsTable";
+import { sql } from "drizzle-orm";
+import { HighlightsTable } from "@/components/HighlightsTable";
+import { DownloadableTable } from "@/components/DownloadableTable";
 
 if (Astro.locals.user?.role !== "admin") {
   return Astro.redirect("/");
 }
 
-const initialPosts = await db.query.posts.findMany({
-  with: {
-    user: {
-      columns: {
-        name: true,
+const page = Astro.url.searchParams.get("usersPage") || "1";
+const postsPage = Astro.url.searchParams.get("postsPage") || "1";
+
+const [posts, users] = await Promise.all([
+  db.query.posts.findMany({
+    with: {
+      user: {
+        columns: {
+          name: true,
+        },
+      },
+      priority: {
+        columns: {
+          priority: true,
+        },
       },
     },
-  },
-});
+  }),
+  db.query.user.findMany({
+    columns: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      approved: true,
+    },
+    limit: 10,
+    offset: (parseInt(page) - 1) * 10,
+  }),
+]);
 
-const priority = await db.query.priority.findMany({
-  columns: {
-    postId: true,
-    priority: true,
-  },
-  with: {
+const transformedPosts = posts.map((post) => ({
+  ...post,
+  priority: post.priority !== null,
+}));
+
+const priorityPosts = posts
+  .filter((post) => post.priority)
+  .map((post) => ({
+    postId: post.id,
+    priority: post.priority?.priority ?? 0,
     post: {
-      columns: {
-        title: true,
-      },
+      title: post.title,
     },
-  },
-});
+  }));
 
-const posts = initialPosts.map((post) => {
-  const priorityPost = priority.find((p) => p.postId === post.id);
-  return {
-    ...post,
-    priority: priorityPost ? true : false,
-  };
-});
-
-console.log(posts);
+console.log(transformedPosts);
 ---
 
 <Layout>
   <main
     class="container bg-slate-50 max-w-full min-h-[calc(100vh-100px)] mx-auto p-8"
   >
-    <header class="mb-8">
-      <div
-        class="rounded-xl bg-gradient-to-r from-slate-50 to-white p-8 shadow-sm border border-slate-100"
-      >
-        <h1 class="text-4xl font-bold text-slate-900">Admin Dashboard</h1>
-      </div>
-    </header>
-
     <section class="grid gap-8 md:grid-cols-2">
       <div
-        class="rounded-xl bg-white p-8 shadow-sm border border-slate-100 transition-all hover:shadow-md"
+        class="rounded-xl bg-white p-8 col-span-2 shadow-sm border border-slate-100 transition-all hover:shadow-md"
       >
         <h2 class="text-2xl font-semibold text-slate-800 mb-6">Users</h2>
-        <UsersTable client:load />
+        <UsersTable page={page} users={users} client:load />
       </div>
 
       <div
         class="rounded-xl bg-white p-8 shadow-sm border border-slate-100 transition-all hover:shadow-md"
       >
         <h2 class="text-2xl font-semibold text-slate-800 mb-6">Posts</h2>
-        <PostsTable posts={posts} client:load />
+        <PostsTable posts={transformedPosts} client:only="react" />
       </div>
-      <div
-        class="rounded-xl bg-white p-8 shadow-sm border border-slate-100 transition-all hover:shadow-md"
-      >
-        <h2 class="text-2xl font-semibold text-slate-800 mb-6">Family</h2>
-      </div>
+
       <div
         class="rounded-xl bg-white p-8 shadow-sm border border-slate-100 transition-all hover:shadow-md"
       >
         <h2 class="text-2xl font-semibold text-slate-800 mb-6">
           Priority Posts
         </h2>
-        <PriorityPostsTable
-          priorityPosts={priority}
-          posts={posts}
-          client:load
-        />
+        <PriorityPostsTable client:load />
+      </div>
+      <div
+        class="rounded-xl bg-white p-8 shadow-sm border border-slate-100 transition-all hover:shadow-md"
+      >
+        <h2 class="text-2xl font-semibold text-slate-800 mb-6">Highlights</h2>
+        <p>Add highlights here such as simple pictures with short captions</p>
+        <HighlightsTable client:load />
+      </div>
+      <div
+        class="rounded-xl bg-white p-8 shadow-sm border border-slate-100 transition-all hover:shadow-md"
+      >
+        <h2 class="text-2xl font-semibold text-slate-800 mb-6">
+          Downloadable Content
+        </h2>
+        <p>Add downloadable content here such as pdfs, documents, etc.</p>
+        <DownloadableTable client:load />
       </div>
     </section>
   </main>

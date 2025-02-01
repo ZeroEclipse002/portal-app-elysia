@@ -1,0 +1,47 @@
+---
+import { db } from "@/db";
+
+const { userId } = Astro.props;
+
+const user = await db.query.user.findFirst({
+    where: (table, { eq }) => eq(table.id, userId as string),
+});
+
+if (!user) {
+    return Astro.redirect("/admin");
+}
+---
+
+<div class="rounded-xl bg-slate-50/80 p-8">
+    <h2 class="text-2xl font-semibold text-slate-800 mb-8 tracking-tight">
+        Basic Information
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-2">
+            <p class="text-sm font-medium text-slate-500">Name</p>
+            <p class="text-slate-900">{user.name}</p>
+        </div>
+        <div class="space-y-2">
+            <p class="text-sm font-medium text-slate-500">Email</p>
+            <p class="text-slate-900">{user.email}</p>
+        </div>
+        <div class="space-y-2">
+            <p class="text-sm font-medium text-slate-500">Role</p>
+            <p class="text-slate-900">{user.role}</p>
+        </div>
+        <div class="space-y-2">
+            <p class="text-sm font-medium text-slate-500">Status</p>
+            <p class="text-slate-900">
+                <span
+                    class={`inline-flex items-center px-3 py-1 rounded-full text-sm ${
+                        user.approved
+                            ? "bg-green-100 text-green-700"
+                            : "bg-yellow-100 text-yellow-700"
+                    }`}
+                >
+                    {user.approved ? "Approved" : "Pending"}
+                </span>
+            </p>
+        </div>
+    </div>
+</div>

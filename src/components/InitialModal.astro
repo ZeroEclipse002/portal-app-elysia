@@ -1,16 +1,18 @@
 ---
 import { fetchClient } from "@/lib/utils";
 import InitialModalClient from "./InitialModalClient";
+import { Debug } from "astro:components";
 
 const { data: initialDetails } = await fetchClient.api.initialconfig.get({
     headers: Object.fromEntries(Astro.request.headers.entries()),
 });
 
-console.log("initialDetails", initialDetails);
+const showModal =
+    !initialDetails.hasInitialDetails && Astro.locals.session !== null;
 ---
 
 {
-    !initialDetails && (
+    showModal && (
         <div class="fixed inset-0 z-20 grid place-items-center bg-black/50">
             <InitialModalClient path={Astro.url.origin} client:only="react" />
         </div>
