@@ -19,7 +19,6 @@
     "@elysiajs/cron": "^1.2.0",
     "@elysiajs/eden": "^1.2.0",
     "@elysiajs/swagger": "^1.2.0",
-    "@hello-pangea/dnd": "^17.0.0",
     "@nanostores/react": "^0.8.4",
     "@neondatabase/serverless": "^0.10.4",
     "@radix-ui/react-dialog": "^1.1.4",
