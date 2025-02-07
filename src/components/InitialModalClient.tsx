@@ -105,7 +105,7 @@ const InitialModalClient = ({ path }: { path: string }) => {
 
     const FamilyMemberForm = useMemo(() => {
         return familyMembers.map((member, index) => (
-            <div key={index} className="flex flex-col gap-5 bg-slate-50 p-7 rounded-xl border border-slate-100 relative">
+            <div key={index} className="flex flex-col gap-5 bg-slate-50 p-4 md:p-7 rounded-xl border border-slate-100 relative">
                 {/* Remove Member Button */}
                 <button
                     onClick={() => {
@@ -116,7 +116,7 @@ const InitialModalClient = ({ path }: { path: string }) => {
                     <XIcon className="w-5 h-5" />
                 </button>
 
-                <div className="flex justify-between gap-4">
+                <div className="flex flex-col md:flex-row justify-between gap-4">
                     <div className="flex-1">
                         <label className={labelStyles}>Full Name</label>
                         <input
@@ -138,7 +138,7 @@ const InitialModalClient = ({ path }: { path: string }) => {
                     </div>
                 </div>
 
-                <div className="flex justify-between gap-4">
+                <div className="flex flex-col md:flex-row justify-between gap-4">
                     <div className="flex-1">
                         <label className={labelStyles}>Gender</label>
                         <select
@@ -184,8 +184,7 @@ const InitialModalClient = ({ path }: { path: string }) => {
 
     // Main Modal Content
     const MainModalContent = useMemo(() => (
-        <div className="flex flex-col gap-5 bg-white p-7 rounded-xl shadow-sm">
-
+        <div className="flex flex-col gap-5 bg-white p-4 md:p-7 rounded-xl shadow-sm">
             <h2 className="text-xl font-semibold text-slate-800">Personal Details</h2>
             <p className="text-slate-600 text-sm">Please fill in the following details to get started.</p>
             {error.length > 0 && (<div className="flex flex-col gap-2 border border-red-500 p-2 rounded-lg">
@@ -285,18 +284,18 @@ const InitialModalClient = ({ path }: { path: string }) => {
 
     return (
         <>
-            <div className="flex-1 flex flex-col gap-3 bg-slate-100 p-6 rounded-xl m-2 overflow-y-auto">
+            <div className="flex-1 flex flex-col gap-3 bg-slate-100 p-3 md:p-6 rounded-xl m-2 overflow-y-auto">
                 {MainModalContent}
             </div>
 
             {/* Nested Modal for Family Members */}
             {nestedModal && (
-                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50">
-                    <div className="bg-white rounded-xl w-[80%] max-w-4xl h-[80vh] flex flex-col">
+                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-0 md:p-4">
+                    <div className="bg-white rounded-xl w-full h-full md:w-[80%] md:h-[80vh] md:max-w-4xl flex flex-col">
                         {/* Fixed Header */}
-                        <div className="flex items-center justify-between p-7 border-b border-slate-100">
-                            <h2 className="text-xl font-semibold text-slate-800">Add Family Members</h2>
-                            <div className="flex items-center gap-4">
+                        <div className="flex-shrink-0 flex flex-col md:flex-row items-start md:items-center justify-between p-4 md:p-7 border-b border-slate-100">
+                            <h2 className="text-xl font-semibold text-slate-800 mb-4 md:mb-0">Add Family Members</h2>
+                            <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
                                 <p className="text-slate-600 text-sm">Please add at least one family member</p>
                                 <span className="text-sm text-slate-600 bg-slate-100 p-2 rounded-lg">
                                     {familyMembers.length} {familyMembers.length === 1 ? 'member' : 'members'} added
@@ -311,15 +310,15 @@ const InitialModalClient = ({ path }: { path: string }) => {
                         </div>
 
                         {/* Scrollable Content */}
-                        <div className="flex-1 overflow-y-auto p-7">
-                            <div className="space-y-5">
+                        <div className="flex-1 overflow-y-auto p-4 md:p-7">
+                            <div className="space-y-5 pb-4">
                                 {FamilyMemberForm}
                                 {AddMemberButton}
                             </div>
                         </div>
 
                         {/* Fixed Footer */}
-                        <div className="p-7 border-t border-slate-100 flex justify-end gap-3">
+                        <div className="flex-shrink-0 p-4 md:p-7 border-t border-slate-100 flex justify-end gap-3">
                             <button
                                 onClick={() => setNestedModal(false)}
                                 className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors duration-200"

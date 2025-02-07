@@ -10,7 +10,7 @@ const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 export const ChatRequest = ({ requestUpdateId, userId }: { requestUpdateId: string, userId: string }) => {
 
-    const { data: chats, isLoading, error, mutate } = useSWR(`/api/tickets/chatrequests/${requestUpdateId}`, fetcher)
+    const { data: chats, isLoading, error, mutate } = useSWR(`/api/tickets/chatrequests/${requestUpdateId}`, fetcher, { refreshInterval: 1000 })
     const [pending, startTransition] = useTransition()
 
     if (isLoading) {

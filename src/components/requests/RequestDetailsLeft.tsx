@@ -29,7 +29,7 @@ export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, 
 
     if (isLoading) {
         return (
-            <div className="w-[40%] border rounded-xl shrink-0 animate-pulse">
+            <div className="w-full lg:w-[40%] border rounded-xl shrink-0 animate-pulse">
                 <div className="space-y-10">
                     {/* Header Section */}
                     <div className="px-6 py-4">
@@ -110,7 +110,7 @@ export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, 
     }
 
     return (
-        <div className="w-[40%] border rounded-xl shrink-0">
+        <div className="w-full lg:w-[40%] border rounded-xl shrink-0">
             <div className="space-y-6 relative">
                 {/* Header Section */}
                 <div className="px-6 py-4 bg-white rounded-t-xl border-b">
