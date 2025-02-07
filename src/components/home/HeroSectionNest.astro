@@ -3,25 +3,36 @@ import type { Post, Priority } from "@/types/post";
 import { HeroSectionContent } from "./HeroSectionContent";
 
 const { data } = Astro.props;
-const feed = await fetch(Astro.url.origin + "/api/feed");
-const feedData = await feed.json();
 
-const recent: Post[] = feedData.recent;
-const priority: Priority[] = feedData.priority;
+let initialData: any = [];
+let recent: Post[] = [];
+let priority: Priority[] = [];
 
-const initialData = priority[0] ||
+try {
+  const feeds = await fetch(Astro.url.origin + "/api/feed");
+  const feedDatas = await feeds.json();
+
+  recent = feedDatas.recent;
+  priority = feedDatas.priority;
+
+  initialData = priority[0] ||
     recent[0] || {
-        title: "Welcome",
-        type: "Project",
-        shortDescription:
-            "Experience the future of digital innovation with our cutting-edge solutions.",
-        id: "#",
+      title: "Welcome",
+      type: "Project",
+      shortDescription:
+        "Experience the future of digital innovation with our cutting-edge solutions.",
+      id: "#",
     };
+} catch (e) {
+  initialData = [];
+  recent = [];
+  priority = [];
+}
 ---
 
 <HeroSectionContent
-    client:load
-    recent={recent}
-    priority={priority}
-    initialData={initialData}
+  client:load
+  recent={recent}
+  priority={priority}
+  initialData={initialData}
 />

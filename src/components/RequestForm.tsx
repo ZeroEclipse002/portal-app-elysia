@@ -89,21 +89,28 @@ export const RequestForm = () => {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button>
+                <Button className="bg-blue-500 hover:bg-blue-600 text-white shadow-sm">
                     Submit New Request
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-xl">
                 <DialogHeader>
-                    <DialogTitle>Submit New Request</DialogTitle>
-                    <DialogDescription>Please fill out the form below to submit a new request.</DialogDescription>
+                    <DialogTitle className="text-xl font-semibold text-gray-900">Submit New Request</DialogTitle>
+                    <DialogDescription className="text-gray-500 text-sm">
+                        Please fill out the form below to submit a new request.
+                    </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {error && <p className="text-red-500 text-center text-xs border border-red-500 p-2 rounded-md">{error}</p>}
-                    <div className={cn("flex flex-col gap-2", requestType === 'other' && "bg-slate-50 p-4 rounded-md")}>
-                        <Label className="block text-sm font-medium mb-1">Request Type</Label>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {error && (
+                        <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg p-3">
+                            {error}
+                        </div>
+                    )}
+                    
+                    <div className={cn("space-y-2", requestType === 'other' && "bg-gray-50 p-4 rounded-lg border border-gray-100")}>
+                        <Label className="text-sm font-medium text-gray-700">Request Type</Label>
                         <Select onValueChange={(value) => setRequestType(value)}>
-                            <SelectTrigger>
+                            <SelectTrigger className="bg-white border-gray-200">
                                 <SelectValue placeholder="Select Request Type" />
                             </SelectTrigger>
                             <SelectContent>
@@ -114,53 +121,74 @@ export const RequestForm = () => {
                             </SelectContent>
                         </Select>
                         {requestType === 'other' && (
-                            <div>
-                                <Label className="block text-sm font-medium mb-1">Other Request Type</Label>
+                            <div className="pt-2">
+                                <Label className="text-sm font-medium text-gray-700">Specify Request Type</Label>
                                 <Input
                                     value={otherRequestType || ''}
                                     onChange={(e) => setOtherRequestType(e.target.value)}
-                                    placeholder="Please specify the type of request..."
+                                    placeholder="Please specify..."
+                                    className="mt-1 bg-white border-gray-200"
                                 />
                             </div>
                         )}
                     </div>
-                    <div>
-                        <Label className="block text-sm font-medium mb-2">Request Details</Label>
+
+                    <div className="space-y-2">
+                        <Label className="text-sm font-medium text-gray-700">Request Details</Label>
                         <Textarea
                             value={requestDetails || ''}
                             onChange={(e) => setRequestDetails(e.target.value)}
-                            className="w-full p-2 border rounded-md h-24"
-                            placeholder="Please provide additional details about your request..."
+                            className="min-h-[120px] bg-white border-gray-200 resize-none"
+                            placeholder="Please provide additional details..."
                         />
-                        <p className="text-xs my-2 text-gray-500">Please provide as much detail as possible to help us process your request.</p>
+                        <p className="text-xs text-gray-500">
+                            Provide as much detail as possible to help us process your request efficiently.
+                        </p>
                     </div>
-                    <div>
-                        <Label className="block text-sm font-medium mb-2">ID Picture</Label>
-                        <Input
-                            type="file"
-                            // accept="image/*"
-                            className="w-full border rounded-md"
-                            placeholder="Please provide additional details about your request..."
-                            onChange={handleFileChange}
-                        />
-                        <p className="text-xs my-2 text-gray-500">Please upload a clear picture of your ID.</p>
-                    </div>
-                    <div>
-                        <Label className="block text-sm font-medium mb-2">Preview</Label>
-                        <div className="w-full h-48 border rounded-md flex items-center justify-center bg-slate-50">
-                            {idPicture ? (
-                                <img
-                                    src={URL.createObjectURL(idPicture)}
-                                    alt="ID Preview"
-                                    className="max-h-full max-w-full object-contain"
-                                />
-                            ) : (
-                                <p className="text-gray-400">No image selected</p>
-                            )}
+
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label className="text-sm font-medium text-gray-700">ID Picture</Label>
+                            <Input
+                                type="file"
+                                className="bg-white border-gray-200"
+                                onChange={handleFileChange}
+                            />
+                            <p className="text-xs text-gray-500">
+                                Upload a clear picture of your valid ID.
+                            </p>
+                        </div>
+
+                        <div className="rounded-lg border border-gray-200 bg-gray-50 overflow-hidden">
+                            <div className="p-1">
+                                {idPicture ? (
+                                    <img
+                                        src={URL.createObjectURL(idPicture)}
+                                        alt="ID Preview"
+                                        className="w-full h-48 object-contain rounded"
+                                    />
+                                ) : (
+                                    <div className="h-48 flex items-center justify-center text-gray-400">
+                                        <p className="text-sm">No image selected</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
-                    <Button type="submit" disabled={loading}>
-                        Submit Request {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+
+                    <Button 
+                        type="submit" 
+                        disabled={loading}
+                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium"
+                    >
+                        {loading ? (
+                            <div className="flex items-center gap-2">
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <span>Submitting...</span>
+                            </div>
+                        ) : (
+                            "Submit Request"
+                        )}
                     </Button>
                 </form>
             </DialogContent>

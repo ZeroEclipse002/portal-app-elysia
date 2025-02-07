@@ -1,0 +1,93 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import ConcernTimeline from "@/components/ConcernTimeline.astro";
+import { CalendarComp } from "@/components/Calendar";
+import { db } from "@/db";
+import { actions } from "astro:actions";
+import ConcernButton from "@/components/ConcernButton.astro";
+
+if (!Astro.locals.session && !Astro.locals.user?.approved) {
+  return Astro.redirect("/");
+}
+
+// Get today's date in local timezone
+const today = new Date();
+const dateTodayNoTime = today.toLocaleDateString("en-CA"); // This formats as YYYY-MM-DD
+const dateParams = Astro.url.searchParams.get("date") || dateTodayNoTime;
+
+// Fetch concerns for the selected date (you'll need to implement this)
+
+// Format date in a consistent way for both server and client
+// Format date in local timezone
+const formattedDate = new Date(dateParams).toLocaleDateString("en-US", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+
+const result = Astro.getActionResult(actions.addConcern);
+---
+
+<Layout title="Concern Board">
+  <div
+    class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8 justify-center items-center"
+  >
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Concern Board</h1>
+    <p class="text-gray-500 mb-4">
+      Submit concerns and feedback here to help us improve our service.
+    </p>
+
+    {
+      result && !result.error && (
+        <div class="bg-green-100 text-green-800 text-center p-4 rounded-lg">
+          <p class="text-sm font-medium">Successfully submitted concern!</p>
+        </div>
+      )
+    }
+
+    <!-- Calendar Widget -->
+    <div class="mb-8 max-w-fit mx-auto">
+      <CalendarComp selectedDate={dateParams} client:only="react" />
+    </div>
+
+    <!-- Timeline Section -->
+    <div class="w-full rounded-lg shadow p-6 min-w-[80vw]">
+      <h2 class="text-xl font-semibold mb-4">
+        Concerns for {formattedDate}
+      </h2>
+      <div class="flex gap-4 relative p-4 min-h-full">
+        <ConcernTimeline server:defer dateParams={dateParams}>
+          <div slot="fallback" class="w-1/2 space-y-4">
+            {
+              Array(3)
+                .fill(0)
+                .map(() => (
+                  <div class="bg-white rounded-xl p-6 border border-gray-100 animate-pulse">
+                    <div class="h-4 w-24 bg-gray-200 rounded mb-2" />
+                    <div class="space-y-2">
+                      <div class="h-3 w-3/4 bg-gray-200 rounded" />
+                      <div class="h-3 w-1/2 bg-gray-200 rounded" />
+                    </div>
+                  </div>
+                ))
+            }
+          </div>
+        </ConcernTimeline>
+        <div
+          class="sticky top-4 w-1/2 h-fit bg-white rounded-xl shadow-lg p-6 border border-gray-100"
+        >
+          <ConcernButton dateParams={dateParams} server:defer>
+            <div slot="fallback" class="space-y-4">
+              <div class="h-6 w-32 bg-gray-200 rounded animate-pulse"></div>
+              <div class="space-y-2">
+                <div class="h-10 bg-gray-200 rounded"></div>
+                <div class="h-24 bg-gray-200 rounded"></div>
+              </div>
+              <div class="h-10 w-full bg-gray-200 rounded"></div>
+            </div>
+          </ConcernButton>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

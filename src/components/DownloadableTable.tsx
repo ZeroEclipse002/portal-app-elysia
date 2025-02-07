@@ -1,4 +1,4 @@
-import useSWR, { useSWRConfig } from "swr"
+import useSWR, { mutate, useSWRConfig } from "swr"
 import { Table, TableHead, TableRow, TableHeader, TableCell, TableBody } from "./ui/table"
 import type { DownloadableResourcesType, HighlightsType } from "@/db/schema"
 import { Button } from "./ui/button"
@@ -9,16 +9,28 @@ import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { actions } from "astro:actions"
 import { toast } from "sonner"
+import { Trash2Icon } from "lucide-react"
 
 export const fetcher = async (url: string) => fetch(url).then(res => res.json())
 
 export const DownloadableTable = () => {
 
-    const { data: downloadableResources, isLoading } = useSWR<DownloadableResourcesType[]>("/api/downloadable-resources", fetcher)
+    const { data: downloadableResources, isLoading, mutate } = useSWR<DownloadableResourcesType[]>("/api/downloadable-resources", fetcher)
 
     if (isLoading) return <div>Loading...</div>
 
     if (!downloadableResources) return <div>No downloadable resources found</div>
+
+
+    async function deleteFile(fileId: string) {
+        const { data, error } = await actions.admin.deleteFile({ fileId })
+        if (data) {
+            toast.success("File deleted successfully")
+            mutate()
+        } else {
+            toast.error("Failed to delete file")
+        }
+    }
 
     return (
         <>
@@ -28,6 +40,7 @@ export const DownloadableTable = () => {
                     <TableRow>
                         <TableHead>Caption</TableHead>
                         <TableHead>Link</TableHead>
+                        <TableHead>Delete</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -35,6 +48,11 @@ export const DownloadableTable = () => {
                         <TableRow key={data.id}>
                             <TableCell>{data.caption}</TableCell>
                             <TableCell>{data.fileLink ? (<a href={data.fileLink} target="_blank" rel="noopener noreferrer">{data.fileLink.slice(0, 30) + "..."}</a>) : "No link"}</TableCell>
+                            <TableCell>
+                                <Button variant="destructive" size="icon" onClick={() => deleteFile(data.fileId)}>
+                                    <Trash2Icon className="w-4 h-4" />
+                                </Button>
+                            </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

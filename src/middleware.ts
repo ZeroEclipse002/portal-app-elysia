@@ -10,6 +10,7 @@ const authMiddleware = defineMiddleware(async (context, next) => {
         });
 
         // Set each property individually
+        // @ts-ignore
         context.locals.user = session?.user ?? null;
         context.locals.session = session?.session ?? null;
         context.locals.init = false;
@@ -45,5 +46,22 @@ const initMiddleware = defineMiddleware(async (context, next) => {
     }
 });
 
+const adminMiddleware = defineMiddleware(async (context, next) => {
 
-export const onRequest = sequence(authMiddleware)
+    if (context.url.pathname.startsWith('/admin')) {
+        if (!context.locals.user) {
+            return context.redirect('/');
+        }
+
+        if (context.locals.user.role !== 'admin') {
+            return context.redirect('/');
+        }
+    }
+
+    return next();
+
+
+});
+
+
+export const onRequest = sequence(authMiddleware);

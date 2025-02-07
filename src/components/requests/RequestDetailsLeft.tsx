@@ -11,12 +11,13 @@ import { PlusIcon } from "lucide-react";
 import { actions } from "astro:actions";
 import { toast } from "sonner";
 import { useState } from "react";
+import { Switch } from "../ui/switch";
 
 const fetcher = (url: string) => fetch(url).then(res => {
     return res.json()
 })
 
-export const RequestDetailsLeft = ({ requestId }: { requestId: string }) => {
+export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, isAdmin: boolean }) => {
 
     const { data: request, isLoading, error } = useSWR(`/api/request/${requestId}`, fetcher)
     const { mutate } = useSWRConfig()
@@ -77,13 +78,15 @@ export const RequestDetailsLeft = ({ requestId }: { requestId: string }) => {
         const message = formData.get("message") as string
         const type = formData.get("type") as string
         const status = formData.get("status") as string
+        const hasChat = formData.get("hasChat") as string
 
         try {
             const res = actions.admin.addRequestUpdate({
                 message,
                 type: type as "urgent" | "normal",
                 status: status as "submitted" | "reviewed" | "approved" | "rejected",
-                requestId
+                requestId,
+                closedChat: hasChat !== "on" ? true : false
             })
 
             toast.promise(res, {
@@ -108,14 +111,11 @@ export const RequestDetailsLeft = ({ requestId }: { requestId: string }) => {
 
     return (
         <div className="w-[40%] border rounded-xl shrink-0">
-            <div className="space-y-10 relative">
+            <div className="space-y-6 relative">
                 {/* Header Section */}
-                <div className="px-6 py-4">
-
-                    <div className="flex items-center gap-4">
-                        <h1
-                            className="text-2xl font-bold text-gray-900 tracking-tight"
-                        >
+                <div className="px-6 py-4 bg-white rounded-t-xl border-b">
+                    <div className="flex items-center gap-3 mb-3">
+                        <h1 className="text-xl font-semibold text-gray-900">
                             Request Details
                         </h1>
                         <Badge
@@ -124,43 +124,63 @@ export const RequestDetailsLeft = ({ requestId }: { requestId: string }) => {
                                 : request.request.status === "submitted"
                                     ? "default"
                                     : "secondary"}
-                            className="capitalize"
+                            className="capitalize font-medium"
                         >
                             {request.request.status}
                         </Badge>
                     </div>
-                    <p className="mt-2 text-sm text-gray-600">
-                        Reference ID: <span className="font-mono"
-                        >{requestId}</span
-                        >
-                    </p>
+                    <div className="space-y-1">
+                        <p className="text-sm text-gray-500">
+                            Reference ID: <span className="font-mono text-gray-700">{requestId}</span>
+                        </p>
+                        <p className="text-sm text-gray-500">
+                            Request from: <span className="font-medium text-gray-700">{request.request.user.name}</span>
+                        </p>
+                    </div>
                 </div>
 
                 {/* Status Progress */}
-                <div className="bg-white shadow-sm rounded-xl overflow-hidden">
-                    <Dialog>
-                        <DialogTrigger disabled={request.request.status === 'approved' || request.request.status === 'rejected'} asChild className="absolute top-5 right-5">
-                            <Button disabled={request.request.status === 'approved' || request.request.status === 'rejected'} variant="outline">
-                                <PlusIcon className="w-4 h-4" />
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Add Updates</DialogTitle>
-                                <DialogDescription>
-                                    Add updates to the request
-                                </DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-4">
-                                <form className="space-y-4" onSubmit={handleSubmit}>
-                                    <div className="flex flex-col gap-2">
-                                        <Label htmlFor="message">Message</Label>
-                                        <Textarea id="message" name="message" />
+                <div className="bg-white shadow-sm rounded-xl overflow-hidden mx-6">
+                    {isAdmin && (
+                        <Dialog>
+                            <DialogTrigger disabled={request.request.status === 'approved' || request.request.status === 'rejected'} asChild>
+                                <Button
+                                    disabled={request.request.status === 'approved' || request.request.status === 'rejected'}
+                                    variant="outline"
+                                    className="p-2 absolute top-5 right-5 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                                >
+                                    <PlusIcon className="h-5 w-5" />
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="bg-slate-50 p-6 max-w-md">
+                                <DialogHeader className="space-y-2">
+                                    <DialogTitle className="text-xl font-semibold text-gray-900">Add Updates</DialogTitle>
+                                    <DialogDescription className="text-sm text-gray-500">
+                                        Add updates to the request
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <form className="space-y-4 mt-4" onSubmit={handleSubmit}>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="message" className="text-sm font-medium text-gray-700">Message</Label>
+                                        <Textarea
+                                            id="message"
+                                            name="message"
+                                            className="w-full bg-white border border-gray-100 rounded-xl focus:ring-blue-500 focus:border-blue-500"
+                                        />
                                     </div>
-                                    <div className="flex flex-col gap-2">
-                                        <Label htmlFor="type">Type</Label>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="hasChat" className="text-sm font-medium text-gray-700">Has Chat?</Label>
+                                        <Switch 
+                                            name="hasChat" 
+                                            checked={status === 'approved' || status === 'rejected' ? false : undefined}
+                                            disabled={status === 'approved' || status === 'rejected'} 
+                                            className="mt-1" 
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="type" className="text-sm font-medium text-gray-700">Type</Label>
                                         <Select name="type">
-                                            <SelectTrigger>
+                                            <SelectTrigger className="w-full bg-white border border-gray-100 rounded-lg">
                                                 <SelectValue placeholder="Select Type" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -169,10 +189,14 @@ export const RequestDetailsLeft = ({ requestId }: { requestId: string }) => {
                                             </SelectContent>
                                         </Select>
                                     </div>
-                                    <div className="flex flex-col gap-2">
-                                        <Label htmlFor="type">Status</Label>
-                                        <Select name="status" onValueChange={(value) => setStatus(value as "submitted" | "reviewed" | "approved" | "rejected")} defaultValue={request.request.status}>
-                                            <SelectTrigger>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="status" className="text-sm font-medium text-gray-700">Status</Label>
+                                        <Select
+                                            name="status"
+                                            onValueChange={(value) => setStatus(value as "submitted" | "reviewed" | "approved" | "rejected")}
+                                            defaultValue={request.request.status}
+                                        >
+                                            <SelectTrigger className="w-full bg-white border border-gray-100 rounded-lg">
                                                 <SelectValue placeholder="Update Status" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -183,86 +207,71 @@ export const RequestDetailsLeft = ({ requestId }: { requestId: string }) => {
                                             </SelectContent>
                                         </Select>
                                         {(status === 'approved' || status === 'rejected') && (
-                                            <p className="text-sm text-gray-500">
+                                            <p className="text-sm text-gray-500 mt-2">
                                                 When the status is approved or rejected, the request will be closed and no further updates can be added.
                                             </p>
                                         )}
                                     </div>
-                                    <Button type="submit">Add Update</Button>
+                                    <Button
+                                        type="submit"
+                                        className="w-full bg-blue-500 text-white hover:bg-blue-600 rounded-lg py-2 transition-colors"
+                                    >
+                                        Add Update
+                                    </Button>
                                 </form>
-                            </div>
-                        </DialogContent>
-                    </Dialog>
-                    <div className="px-8 py-6">
-                        {
-                            (() => {
-                                const statuses = [
-                                    "submitted",
-                                    "reviewed",
-                                    "approved",
-                                ];
-                                const currentIndex = statuses.indexOf(
-                                    request.request.status,
-                                );
-                                const progress =
-                                    request.request.status === "rejected"
-                                        ? 0
-                                        : Math.round(
-                                            (currentIndex /
-                                                (statuses.length - 1)) *
-                                            100,
-                                        );
-
-                                return (
-                                    request.request.status !== "rejected" && (
-                                        <Progress value={progress} />
-                                    )
-                                );
-                            })()
-                        }
-                        <div className="flex justify-between mt-4">
-                            {request.request.status !== 'rejected' && (
-                                ["submitted", "reviewed", "approved"].map(
-                                    (status, index) => (
-                                        <div key={index} className="text-sm font-medium text-gray-700 capitalize">
+                            </DialogContent>
+                        </Dialog>
+                    )}
+                    <div className="px-6 py-4">
+                        {request.request.status !== "rejected" && (
+                            <>
+                                <Progress
+                                    value={(() => {
+                                        const statuses = ["submitted", "reviewed", "approved"];
+                                        const currentIndex = statuses.indexOf(request.request.status);
+                                        return Math.round((currentIndex / (statuses.length - 1)) * 100);
+                                    })()}
+                                    className="h-2"
+                                />
+                                <div className="flex justify-between mt-3">
+                                    {["submitted", "reviewed", "approved"].map((status) => (
+                                        <div key={status} className="text-xs font-medium text-gray-500 capitalize">
                                             {status}
                                         </div>
-                                    ),
-                                )
-                            )}
-                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     {/* Request Details */}
-                    <div className="border-t border-gray-200">
+                    <div className="border-t border-gray-100">
                         <dl className="divide-y divide-gray-100">
-                            <div className="px-8 py-6">
-                                <dt className="text-sm font-semibold text-gray-900">
+                            <div className="px-6 py-4">
+                                <dt className="text-sm font-medium text-gray-500">
                                     Request Type
                                 </dt>
-                                <dd
-                                    className="mt-2 text-base text-gray-700 capitalize"
-                                >
+                                <dd className="mt-1 text-sm font-medium text-gray-900 capitalize">
                                     {request.request.type}
                                 </dd>
                             </div>
-                            <div className="px-8 py-6">
-                                <dt className="text-sm font-semibold text-gray-900">
+                            <div className="px-6 py-4">
+                                <dt className="text-sm font-medium text-gray-500">
                                     Details
                                 </dt>
-                                <dd className="mt-2 text-base text-gray-700">
+                                <dd className="mt-1 text-sm text-gray-700 leading-relaxed">
                                     {request.request.details}
                                 </dd>
                             </div>
-                            <div className="px-8 py-6">
-                                <dt className="text-sm font-semibold text-gray-900">
+                            <div className="px-6 py-4">
+                                <dt className="text-sm font-medium text-gray-500 mb-2">
                                     ID Picture
                                 </dt>
-                                <dd className="mt-3">
+                                <dd className="mt-2">
                                     <img
                                         src={request.request.idPicture.url}
                                         alt="Request Picture"
-                                        className="rounded-lg shadow-md max-h-[32rem] w-full object-cover"
+                                        className="rounded-lg shadow-sm w-full object-cover max-h-[32rem]"
                                     />
                                 </dd>
                             </div>

@@ -1,11 +1,11 @@
-import useSWR, { useSWRConfig } from "swr"
+import useSWR, { mutate, useSWRConfig } from "swr"
 import { Table, TableHead, TableRow, TableHeader, TableCell, TableBody } from "./ui/table"
 import type { HighlightsType } from "@/db/schema"
 import { Button } from "./ui/button"
 import { Dialog, DialogTitle, DialogHeader, DialogContent, DialogTrigger, DialogFooter, DialogDescription } from "./ui/dialog"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { cn } from "@/lib/utils"
 import { actions } from "astro:actions"
 import { toast } from "sonner"
@@ -14,11 +14,33 @@ export const fetcher = async (url: string) => fetch(url).then(res => res.json())
 
 export const HighlightsTable = () => {
 
-    const { data: highlights, isLoading } = useSWR<HighlightsType[]>("/api/highlights", fetcher)
+    const { data: highlights, isLoading, mutate } = useSWR<HighlightsType[]>("/api/highlights", fetcher)
+    const [pending, startTransition] = useTransition()
 
     if (isLoading) return <div>Loading...</div>
 
     if (!highlights) return <div>No highlights found</div>
+
+    function deleteHighlight(id: number) {
+        startTransition(async () => {
+            try {
+                const response = await actions.admin.removeHighlight({
+                    highlightId: id
+                })
+
+                if (response.data) {
+                    toast.success("Highlight deleted successfully")
+                } else {
+                    toast.error("Failed to delete highlight")
+                }
+
+            } catch (error) {
+                console.error(error)
+            } finally {
+                mutate()
+            }
+        })
+    }
 
     return (
         <>
@@ -29,6 +51,7 @@ export const HighlightsTable = () => {
                         <TableHead>Image</TableHead>
                         <TableHead>Caption</TableHead>
                         <TableHead>Link</TableHead>
+                        <TableHead>Action</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -37,6 +60,11 @@ export const HighlightsTable = () => {
                             <TableCell><img className="aspect-square object-cover rounded-md" src={data.image} alt={data.caption} width={50} height={50} /></TableCell>
                             <TableCell>{data.caption}</TableCell>
                             <TableCell>{data.link ? (<a href={data.link} target="_blank" rel="noopener noreferrer">{data.link.slice(0, 30) + "..."}</a>) : "No link"}</TableCell>
+                            <TableCell>
+                                <Button onClick={() => deleteHighlight(data.id)} variant={'destructive'}>
+                                    Delete
+                                </Button>
+                            </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

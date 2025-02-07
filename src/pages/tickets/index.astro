@@ -8,6 +8,10 @@ if (!Astro.locals.session) {
   return Astro.redirect("/");
 }
 
+if (Astro.locals.user?.approved !== true) {
+  return Astro.redirect("/");
+}
+
 const { searchParams } = Astro.url;
 
 const page = searchParams.get("page") || "1";
@@ -25,7 +29,7 @@ const page = searchParams.get("page") || "1";
 
       {
         Astro.locals.user?.role === "admin" ? (
-          <RequestsTable page={page} client:only />
+          <RequestsTable client:only />
         ) : (
           <>
             <RequestForm client:only />

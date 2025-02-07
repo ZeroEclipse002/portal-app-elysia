@@ -1,5 +1,9 @@
+import { cn } from "@/lib/utils"
 import { ModalAuth } from "./ModalAuth"
 import { Signout } from "./Signout"
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "./ui/navigation-menu"
+import React from "react"
+
 
 
 
@@ -12,33 +16,78 @@ export const MainHeader = ({ role, pathname, approved, hasSession }: { role: str
                     {/* Logo */}
                     <a href="/" className="flex items-center mb-5 font-medium text-gray-900 md:mb-0">
                         <span className="text-xl font-black leading-none text-gray-900 select-none">
-                            Logo<span className="text-indigo-600">.</span>
+                            Marawoy<span className="text-indigo-600">.</span>
                         </span>
                     </a>
 
                     {/* Main Navigation */}
                     <nav className="flex flex-wrap items-center mb-5 text-base md:mb-0 md:pl-8 md:ml-8 md:border-l md:border-gray-200">
-                        <a href="/" className={`mr-5 font-medium leading-6 text-gray-600 hover:text-gray-900 ${pathname === '/' ? 'text-gray-900 underline pointer-events-none' : ''}`}>
-                            Home
-                        </a>
-                        {approved && (
-                            <a href="/tickets" className={`mr-5 font-medium leading-6 text-gray-600 hover:text-gray-900 ${pathname === '/tickets' ? 'text-gray-900 underline pointer-events-none' : ''}`}>
-                                Requests
-                            </a>
-                        )}
-                        <a href="/news" className={`mr-5 font-medium leading-6 text-gray-600 hover:text-gray-900 ${pathname === '/news' ? 'text-gray-900 underline pointer-events-none' : ''}`}>
-                            News
-                        </a>
-                        {role === 'admin' && (
-                            <>
-                                <a href="/admin" className={`mr-5 font-medium leading-6 text-gray-600 hover:text-gray-900 ${pathname === '/admin' ? 'text-gray-900 underline pointer-events-none' : ''}`}>
-                                    Admin
-                                </a>
-                                <a href="/grid" className={`mr-5 font-medium leading-6 text-gray-600 hover:text-gray-900 ${pathname === '/grid' ? 'text-gray-900 underline pointer-events-none' : ''}`}>
-                                    Grid
-                                </a>
-                            </>
-                        )}
+                        <NavigationMenu>
+                            <NavigationMenuList>
+                                <NavigationMenuItem>
+                                    <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                                        <a href="/">
+                                            Home
+                                        </a>
+                                    </NavigationMenuLink>
+                                </NavigationMenuItem>
+                                {approved && (
+                                    <NavigationMenuItem>
+                                        <NavigationMenuTrigger>Services</NavigationMenuTrigger>
+                                        <NavigationMenuContent className="flex flex-col gap-2 p-2">
+                                            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+                                                <ListItem
+                                                    key={'/tickets'}
+
+                                                    title={'Tickets'}
+                                                    href={'/tickets'}
+                                                >
+                                                    View and manage requests/tickets
+                                                </ListItem>
+                                                <ListItem
+                                                    key={'/concern'}
+                                                    title={'Concern Board'}
+                                                    href={'/concern'}
+                                                >
+                                                    Submit concerns and feedback
+                                                </ListItem>
+                                            </ul>
+                                        </NavigationMenuContent>
+                                    </NavigationMenuItem>
+                                )}
+                                <NavigationMenuItem>
+                                    <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                                        <a href="/news">
+                                            News
+                                        </a>
+                                    </NavigationMenuLink>
+                                </NavigationMenuItem>
+                                {role === 'admin' && (
+                                    <NavigationMenuItem>
+                                        <NavigationMenuTrigger>Admin</NavigationMenuTrigger>
+                                        <NavigationMenuContent className="flex flex-col gap-2 p-2">
+                                            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+                                                <ListItem
+                                                    key={'/dashboard'}
+
+                                                    title={'Dashboard'}
+                                                    href={'/admin'}
+                                                >
+                                                    Manage Users and Posts
+                                                </ListItem>
+                                                <ListItem
+                                                    key={'/grid'}
+                                                    title={'Grid'}
+                                                    href={'/grid'}
+                                                >
+                                                    Simple layout editor for index page
+                                                </ListItem>
+                                            </ul>
+                                        </NavigationMenuContent>
+                                    </NavigationMenuItem>
+                                )}
+                            </NavigationMenuList>
+                        </NavigationMenu>
                     </nav>
                 </div>
 
@@ -75,3 +124,30 @@ export const MainHeader = ({ role, pathname, approved, hasSession }: { role: str
         </section>
     )
 }
+
+const ListItem = React.forwardRef<
+    React.ElementRef<"a">,
+    React.ComponentPropsWithoutRef<"a">
+>(({ className, title, children, ...props }, ref) => {
+    return (
+        <li>
+            <NavigationMenuLink asChild>
+                <a
+                    ref={ref}
+                    className={cn(
+                        "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+                        className
+                    )}
+                    {...props}
+                >
+                    <div className="text-sm font-medium leading-none">{title}</div>
+                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                        {children}
+                    </p>
+                </a>
+            </NavigationMenuLink>
+        </li>
+    )
+})
+ListItem.displayName = "ListItem"
+

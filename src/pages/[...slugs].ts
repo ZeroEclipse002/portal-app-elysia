@@ -8,6 +8,9 @@ import { cron, Patterns } from '@elysiajs/cron';
 import { getConfig, getRecentPosts, getPriorityPosts, getPostContent, getUserFamily, getRequests, getRequest, getRequestLogs, getPosts, getAllRequests, getHighlights, getDownloadableResources, getLatestAnnouncementAndNews } from '@/db/queries';
 import { utapi } from '@/utconfig/uploadthing';
 import _ from 'lodash';
+import { db } from '@/db';
+import { requests, requestUpdates, requestUpdatesChat } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 class MemoryCache {
     private cache: Map<string, { value: any, expiry: number }>;
@@ -223,6 +226,12 @@ const app = new Elysia()
 
             const request = await getRequest.execute({ requestId: params.requestId as string })
 
+            if (user.role !== 'admin') {
+                if (request?.userId !== user.id) {
+                    throw new Error('Unauthorized');
+                }
+            }
+
             if (!request) {
                 throw new Error('Request not found');
             }
@@ -238,7 +247,7 @@ const app = new Elysia()
                 return {
                     request: {
                         ...cached.request,
-                        status: request.status
+                        status: request.status,
                     }
                 };
             }
@@ -332,6 +341,30 @@ const app = new Elysia()
 
             return {
                 latestAnnouncementAndNews: _.pick(latestAnnouncementAndNews, ['rows'])
+            };
+        })
+        .get("/tickets/chatrequests/:requestUpdateId", async ({ params, user }) => {
+            if (!params.requestUpdateId) {
+                throw new Error('Request ID is required');
+            }
+
+            if (!user) {
+                throw new Error('Unauthorized');
+            }
+
+            const chat = await db.query.requestUpdates.findFirst({
+                where: (table, { eq }) => eq(table.id, params.requestUpdateId as string),
+                with: {
+                    chatrecord: true
+                }
+            })
+
+            console.log(chat);
+
+            // throw new Error('Not implemented');
+            // const chats = await getChatRequests.execute({ requestUpdateId: params.requestUpdateId as string })
+            return {
+                chat
             };
         })
     )

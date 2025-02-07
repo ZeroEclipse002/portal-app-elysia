@@ -388,7 +388,8 @@ export const admin = {
             requestId: z.string(),
             message: z.string(),
             type: z.enum(['urgent', 'normal']),
-            status: z.enum(['submitted', 'reviewed', 'approved', 'rejected'])
+            status: z.enum(['submitted', 'reviewed', 'approved', 'rejected']),
+            closedChat: z.boolean().default(true)
         }),
         handler: async (input, context) => {
             authMiddleware(context)
@@ -408,6 +409,7 @@ export const admin = {
                     requestId: input.requestId,
                     message: input.message,
                     type: input.type,
+                    updateClose: input.closedChat,
                 }).returning()
 
                 if (input.status !== request.status) {
@@ -490,6 +492,7 @@ export const admin = {
 
                 const [downloadableResource] = await db.insert(downloadableContent).values({
                     fileLink: getUrl.url,
+                    fileId: fileLink.data.key,
                     caption: input.caption
                 }).returning()
 
@@ -503,11 +506,98 @@ export const admin = {
             return downloadableResource
 
         }
+    }),
+    deleteFile: defineAction({
+        accept: 'json',
+        input: z.object({
+            fileId: z.string()
+        }),
+        handler: async (input, context) => {
+            await authMiddleware(context)
+
+            const fileReturn = await db.transaction(async (tx) => {
+
+                const fileDelete = await utapi.deleteFiles([
+                    input.fileId
+                ])
+
+                if (!fileDelete.success) {
+                    throw new ActionError({
+                        code: 'INTERNAL_SERVER_ERROR',
+                        message: 'Failed to delete file'
+                    })
+                }
+
+                const [file] = await tx.delete(downloadableContent).where(eq(downloadableContent.fileId, input.fileId)).returning()
+
+                if (!file) {
+                    throw new ActionError({
+                        code: 'NOT_FOUND',
+                        message: 'File not found'
+                    })
+                }
+
+                return file
+            })
+
+            return {
+                success: true,
+                fileId: fileReturn.fileId
+            }
+        }
+    }),
+    closeChat: defineAction({
+        accept: 'json',
+        input: z.object({
+            requestLogId: z.string()
+        }),
+        handler: async (input, context) => {
+
+            await authMiddleware(context)
+
+            const [requestLog] = await db.update(requestUpdates).set({
+                updateClose: true
+            }).where(eq(requestUpdates.id, input.requestLogId)).returning()
+
+            if (!requestLog) {
+                throw new ActionError({
+                    code: 'NOT_FOUND',
+                    message: 'Request log not found'
+                })
+            }
+
+            return {
+                success: true,
+                requestLogId: requestLog.id
+            }
+        }
+    }),
+    removeHighlight: defineAction({
+        accept: 'json',
+        input: z.object({
+            highlightId: z.number()
+        }),
+        handler: async (input, context) => {
+            authMiddleware(context)
+
+            const [highl] = await db.delete(highlights).where(eq(highlights.id, input.highlightId)).returning()
+
+            if (!highl) {
+                throw new ActionError({
+                    code: 'NOT_FOUND',
+                    message: 'Highlight not found'
+                })
+            }
+            return {
+                success: true,
+                highlightId: highl.id
+            }
+        }
     })
 }
 
 
-const authMiddleware = (context: ActionAPIContext) => {
+const authMiddleware = async (context: ActionAPIContext) => {
     if (!context.locals.user) {
         throw new ActionError({
             code: 'UNAUTHORIZED',

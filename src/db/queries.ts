@@ -41,7 +41,14 @@ export const getRequests = db.query.requests.findMany({
 }).prepare('getRequests')
 
 export const getRequest = db.query.requests.findFirst({
-    where: (table, { eq, sql }) => eq(table.id, sql.placeholder("requestId"))
+    where: (table, { eq, sql }) => eq(table.id, sql.placeholder("requestId")),
+    with: {
+        user: {
+            columns: {
+                name: true
+            }
+        }
+    }
 }).prepare('getRequest')
 
 export const getAllRequests = db.query.requests.findMany({

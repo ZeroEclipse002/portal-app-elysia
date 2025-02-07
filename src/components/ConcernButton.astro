@@ -1,0 +1,63 @@
+---
+import { db } from "@/db";
+import { actions } from "astro:actions";
+
+const { dateParams } = Astro.props;
+
+const concernsUser = await db.query.concernBoard.findFirst({
+  where: (table, { between, and, eq }) =>
+    and(
+      between(
+        table.createdAt,
+        new Date(dateParams + "T00:00:00.000Z"),
+        new Date(dateParams + "T23:59:59.999Z")
+      ),
+      eq(table.userId, Astro.locals.user?.id!)
+    ),
+});
+
+const notDateToday =
+  new Date(dateParams + "T00:00:00.000Z").toDateString() !==
+  new Date().toDateString();
+---
+
+<h3 class="text-lg font-medium text-gray-900 mb-4">Submit a Concern</h3>
+{
+  concernsUser && (
+    <div class="bg-green-100 text-green-800 text-center p-4 rounded-lg">
+      <p class="text-sm font-medium">
+        You have already submitted a concern for this date
+      </p>
+    </div>
+  )
+}
+
+{
+  notDateToday && (
+    <div class="bg-red-100 text-red-800 text-center p-4 my-2 rounded-lg">
+      <p class="text-sm font-medium">You can only submit concerns for today</p>
+    </div>
+  )
+}
+
+<form action={actions.addConcern} method="post" class="space-y-4">
+  <div class="space-y-2">
+    <label for="message" class="block text-sm font-medium text-gray-700">
+      Your Concern
+    </label>
+    <textarea
+      id="message"
+      name="message"
+      rows="3"
+      placeholder="Describe your concern here..."
+      class="w-full rounded-lg px-4 py-3 border border-gray-200 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 transition-all duration-200 resize-none"
+    ></textarea>
+  </div>
+  <button
+    disabled={concernsUser || notDateToday ? true : false}
+    type="submit"
+    class="w-full bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg px-4 py-3 font-medium hover:bg-blue-700 disabled:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200"
+  >
+    Submit Concern
+  </button>
+</form>

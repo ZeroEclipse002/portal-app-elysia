@@ -7,20 +7,29 @@ import { RequestDetailsRight } from "@/components/requests/RequestDetailsRight";
 const { requestId } = Astro.params;
 
 if (!requestId) {
-    return Astro.redirect("/tickets");
+  return Astro.redirect("/tickets");
 }
 
 if (Astro.locals.user && Astro.locals.user.role !== "admin") {
-    return Astro.redirect("/tickets");
+  return Astro.redirect("/tickets");
 }
 ---
 
 <Layout title={`Ticket - ${requestId}`}>
-    <div class="flex gap-6 max-w-7xl mx-auto">
-        {/* Left side - Original request details (made narrower) */}
-        <RequestDetailsLeft requestId={requestId} client:only="react" />
+  <div class="flex gap-6 max-w-7xl mx-auto">
+    {/* Left side - Original request details (made narrower) */}
+    <RequestDetailsLeft
+      isAdmin={Astro.locals.user?.role === "admin"}
+      requestId={requestId}
+      client:only="react"
+    />
 
-        {/* Right side - Timeline of updates */}
-        <RequestDetailsRight requestId={requestId} client:only="react" />
-    </div>
+    {/* Right side - Timeline of updates */}
+    <RequestDetailsRight
+      requestId={requestId}
+      isAdmin={Astro.locals.user?.role === "admin"}
+      userId={Astro.locals.user?.id!}
+      client:only="react"
+    />
+  </div>
 </Layout>

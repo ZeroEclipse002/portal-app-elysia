@@ -19,8 +19,7 @@ export const PriorityPostsTable = () => {
     const [error, setError] = useState<string | null>(null)
     const [open, setOpen] = useState(false)
 
-    const { data: postArray } = useSWR<{ posts: Post[], priorityPosts: PriorityPostWithPost[] }>('/api/adminposts', fetcher)
-    const { mutate } = useSWRConfig()
+    const { data: postArray, mutate } = useSWR<{ posts: Post[], priorityPosts: PriorityPostWithPost[] }>('/api/adminposts', fetcher)
 
     async function addPriority() {
 
@@ -51,7 +50,7 @@ export const PriorityPostsTable = () => {
             }
         })
 
-        mutate('/api/adminposts')
+        await mutate()
     }
 
 
@@ -67,7 +66,7 @@ export const PriorityPostsTable = () => {
             error: 'Failed to remove priority',
         })
 
-        mutate('/api/adminposts')
+        await mutate()
     }
 
     if (!postArray) {

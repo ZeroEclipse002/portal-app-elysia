@@ -101,7 +101,7 @@ export const postContent = pgTable("post_content", {
 export const priority = pgTable("priority", (t) => ({
     id: t.serial("id").primaryKey(),
     priority: t.integer("priority").notNull().default(0).unique(),
-    postId: t.text("post_id").notNull().references(() => posts.id, { onDelete: 'set null' }).unique(),
+    postId: t.text("post_id").notNull().references(() => posts.id, { onDelete: 'cascade' }).unique(),
 }),
     (table) => [{
         checkLimit: check("priority_check", sql`${table.priority} >= 0 AND ${table.priority} <= 10`),
@@ -120,11 +120,22 @@ export const requests = pgTable("requests", {
 
 export const requestUpdates = pgTable("request_updates", {
     id: uuid("id").primaryKey().defaultRandom(),
-    requestId: uuid("request_id").references(() => requests.id, { onDelete: 'set null' }),
+    requestId: uuid("request_id").references(() => requests.id, { onDelete: 'cascade' }),
     message: text("message").notNull(),
     type: text("type", { enum: ['urgent', 'normal'] }).notNull(),
-    createdAt: timestamp("created_at").notNull().defaultNow()
+    updateClose: boolean("update_close").notNull().default(false),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow()
 })
+
+export const requestUpdatesChat = pgTable("request_updates_chat", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    requestLogId: uuid("request_id").references(() => requestUpdates.id, { onDelete: 'cascade' }),
+    userId: text("user_id").references(() => user.id, { onDelete: 'cascade' }),
+    message: text("message").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+})
+
 
 export const sectionSequence = pgTable("section_sequence", {
     id: text("id").primaryKey(),
@@ -142,6 +153,7 @@ export const highlights = pgTable("highlights", {
 export const downloadableContent = pgTable("downloadable_content", {
     id: serial("id").primaryKey(),
     fileLink: text("file").notNull(),
+    fileId: text("file_id").notNull(),
     caption: text("caption").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow()
 })
@@ -154,6 +166,12 @@ export const feedBack = pgTable("feed_back", {
     createdAt: timestamp("created_at").notNull().defaultNow()
 })
 
+export const concernBoard = pgTable("concern_board", {
+    id: serial("id").primaryKey(),
+    userId: text("user_id").references(() => user.id, { onDelete: 'set null' }),
+    message: text("message").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow()
+})
 
 export const postRelations = relations(posts, ({ one }) => ({
     user: one(user, {
@@ -166,9 +184,23 @@ export const postRelations = relations(posts, ({ one }) => ({
     })
 }))
 
-export const userRelations = relations(user, ({ many }) => ({
+export const userRelations = relations(user, ({ many, one }) => ({
     posts: many(posts),
-    feedBack: many(feedBack)
+    feedBack: many(feedBack),
+    concerns: many(concernBoard),
+    family: one(familyData, {
+        fields: [user.id],
+        references: [familyData.userId]
+    }),
+    requests: many(requests),
+    chatrequests: many(requestUpdatesChat)
+}))
+
+export const familyDataRelations = relations(familyData, ({ one }) => ({
+    user: one(user, {
+        fields: [familyData.userId],
+        references: [user.id]
+    })
 }))
 
 export const feedBackRelations = relations(feedBack, ({ one }) => ({
@@ -200,10 +232,29 @@ export const requestRelations = relations(requests, ({ one, many }) => ({
     updates: many(requestUpdates)
 }))
 
-export const requestUpdateRelations = relations(requestUpdates, ({ one }) => ({
+export const requestUpdatesChatRelations = relations(requestUpdatesChat, ({ one }) => ({
+    requestLog: one(requestUpdates, {
+        fields: [requestUpdatesChat.requestLogId],
+        references: [requestUpdates.id]
+    }),
+    user: one(user, {
+        fields: [requestUpdatesChat.userId],
+        references: [user.id]
+    })
+}))
+
+export const requestUpdateRelations = relations(requestUpdates, ({ one, many }) => ({
     request: one(requests, {
         fields: [requestUpdates.requestId],
         references: [requests.id]
+    }),
+    chatrecord: many(requestUpdatesChat)
+}))
+
+export const concernRelations = relations(concernBoard, ({ one }) => ({
+    user: one(user, {
+        fields: [concernBoard.userId],
+        references: [user.id]
     })
 }))
 
@@ -217,7 +268,10 @@ export interface PostWithUser extends Post {
         name: string
     }
 }
+
+export type ConcernType = typeof concernBoard.$inferSelect
 export type HighlightsType = typeof highlights.$inferSelect
+export type ChatType = typeof requestUpdatesChat.$inferSelect
 export type DownloadableResourcesType = typeof downloadableContent.$inferSelect
 export type Ticket = typeof requests.$inferSelect
 export type TicketUpdate = typeof requestUpdates.$inferSelect

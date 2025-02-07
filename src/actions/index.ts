@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { familyData, requests, sectionSequence, user, userDetails } from "@/db/schema";
+import { concernBoard, familyData, requests, requestUpdatesChat, sectionSequence, user, userDetails } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { ActionError, defineAction, type ActionAPIContext } from "astro:actions";
 import { z } from "astro:schema";
@@ -19,6 +19,8 @@ export const server = {
         }),
         handler: async (input, context) => {
 
+            console.log(input)
+
             const noAdmin = await db.query.user.findFirst({
                 where: (table, { eq }) => eq(table.role, 'admin')
             })
@@ -35,6 +37,8 @@ export const server = {
                     name: input.name,
                     email: input.email,
                     password: input.password,
+                    role: 'admin',
+                    approved: true
                 }
             })
 
@@ -85,7 +89,7 @@ export const server = {
         handler: async (input, context) => {
             console.log(input)
 
-            AuthMiddleware(context)
+            await AuthMiddleware(context)
 
             await new Promise(resolve => setTimeout(resolve, 2000))
 
@@ -139,7 +143,7 @@ export const server = {
                     });
                 }
 
-                AuthMiddleware(context)
+                await ApprovedMiddleware(context)
 
                 console.log('Request received:', {
                     ...input,
@@ -190,11 +194,127 @@ export const server = {
             }
         }
     }),
+    addConcern: defineAction({
+        accept: 'form',
+        input: z.object({
+            message: z.string(),
+        }),
+        handler: async (input, context) => {
+            try {
+                console.log(input)
+                await ApprovedMiddleware(context)
+
+                const concernsUser = await db.query.concernBoard.findFirst({
+                    where: (table, { between, and, eq }) =>
+                        and(
+                            between(
+                                table.createdAt,
+                                new Date(new Date().toISOString().split("T")[0] + "T00:00:00.000Z"),
+                                new Date(new Date().toISOString().split("T")[0] + "T23:59:59.999Z")
+                            ),
+                            eq(table.userId, context.locals.user?.id!)
+                        ),
+                });
+
+                if (concernsUser) {
+                    throw new ActionError({
+                        code: 'BAD_REQUEST',
+                        message: 'You have already submitted a concern for this date'
+                    })
+                }
+
+                const [concern] = await db.insert(concernBoard).values({
+                    userId: context.locals.user?.id,
+                    message: input.message,
+                    createdAt: new Date(),
+                }).returning()
+
+                return {
+                    success: true,
+                    message: 'Concern added successfully'
+                }
+            } catch (error) {
+                console.error('Error adding concern:', error)
+                throw error
+            }
+        }
+    }),
+    sendMessage: defineAction({
+        accept: 'form',
+        input: z.object({
+            message: z.string(),
+            requestUpdateId: z.string()
+        }),
+        handler: async (input, context) => {
+            try {
+                await ApprovedMiddleware(context)
+
+                if (context.locals.user?.role !== 'admin') {
+
+                    const request = await db.query.requestUpdates.findFirst({
+                        where: (table, { eq }) => eq(table.id, input.requestUpdateId),
+                        with: {
+                            request: {
+                                columns: {
+                                    userId: true
+                                }
+                            }
+                        }
+                    })
+
+                    if (!request) {
+                        throw new ActionError({
+                            code: 'BAD_REQUEST',
+                            message: 'Request not found'
+                        })
+                    }
+
+                    if (request.request?.userId !== context.locals.user?.id) {
+                        throw new ActionError({
+                            code: 'BAD_REQUEST',
+                            message: 'You are not authorized to send messages for this request'
+                        })
+                    }
+                }
+
+                const [requestUpdate] = await db.insert(requestUpdatesChat).values({
+                    requestLogId: input.requestUpdateId,
+                    userId: context.locals.user?.id,
+                    message: input.message,
+                    createdAt: new Date(),
+                }).returning()
+
+                return {
+                    success: true,
+                    message: 'Message sent successfully'
+                }
+            } catch (error) {
+                console.error('Error sending message:', error)
+                throw error
+            }
+        }
+    }),
     admin
 }
 
-function AuthMiddleware(context: ActionAPIContext) {
+async function AuthMiddleware(context: ActionAPIContext) {
     if (!context.locals.user) {
+        throw new ActionError({
+            code: 'UNAUTHORIZED',
+            message: 'Unauthorized'
+        })
+    }
+
+}
+
+async function ApprovedMiddleware(context: ActionAPIContext) {
+    if (!context.locals.user) {
+        throw new ActionError({
+            code: 'UNAUTHORIZED',
+            message: 'Unauthorized'
+        })
+    }
+    if (context.locals.user.approved !== true) {
         throw new ActionError({
             code: 'UNAUTHORIZED',
             message: 'Unauthorized'

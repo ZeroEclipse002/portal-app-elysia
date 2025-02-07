@@ -1,13 +1,15 @@
+import type { Ticket } from "@/db/schema";
+import { useState } from "react";
 import useSWR from "swr";
 
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
-export const RequestsTable = ({ page }: { page: string }) => {
-    const { data: requests, isLoading } = useSWR(`/api/adminrequests?page=${page}`, fetcher)
+const RequestsTableNest = ({ requests, isLoading }: { requests: Ticket[], isLoading: boolean }) => {
 
+    if (isLoading) return <div>Loading...</div>
 
-    return (
+    return requests && (
         <div>
             {isLoading ? (
                 <div className="flex justify-center items-center h-32">
@@ -62,7 +64,7 @@ export const RequestsTable = ({ page }: { page: string }) => {
                                                     {new Date(request.createdAt).toLocaleDateString()}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                    <a href={`/tickets/admin/${request.id}`} className="text-blue-500 hover:underline">View</a>
+                                                    <a href={`/tickets/${request.id}`} className="text-blue-500 hover:underline">View</a>
                                                 </td>
                                             </tr>
                                         ))}
@@ -117,13 +119,13 @@ export const RequestsTable = ({ page }: { page: string }) => {
                                                     {new Date(request.createdAt).toLocaleDateString()}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                    <a href={`/tickets/admin/${request.id}`} className="text-blue-500 hover:underline">View</a>
+                                                    <a href={`/tickets/${request.id}`} className="text-blue-500 hover:underline">View</a>
                                                 </td>
                                             </tr>
                                         ))}
                                 </tbody>
                             </table>
-                            <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
+                            {/* <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
                                 <div>
                                     {parseInt(page) > 1 && (
                                         <a
@@ -137,8 +139,8 @@ export const RequestsTable = ({ page }: { page: string }) => {
                                         </a>
                                     )}
                                 </div>
-                            </div>
-                            <div>
+                            </div> */}
+                            {/* <div>
                                 {requests?.length === 10 && (
                                     <a
                                         href={`/tickets?page=${parseInt(page) + 1}`}
@@ -150,7 +152,7 @@ export const RequestsTable = ({ page }: { page: string }) => {
                                         </svg>
                                     </a>
                                 )}
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </>
@@ -158,4 +160,47 @@ export const RequestsTable = ({ page }: { page: string }) => {
             )}
         </div>
     )
+}
+
+
+export const RequestsTable = () => {
+
+    const [page, setPage] = useState<number>(1)
+    const { data: requests, isLoading } = useSWR(`/api/adminrequests?page=${page}`, fetcher)
+
+
+    return (
+        <>
+            <RequestsTableNest requests={requests} isLoading={isLoading} />
+            <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
+                <div>
+                    {page > 1 && (
+                        <button
+                            onClick={() => setPage(page - 1)}
+                            className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                        >
+                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                            Previous
+                        </button>
+                    )}
+                </div>
+                <div>
+                    {requests?.length === 10 && (
+                        <button
+                            onClick={() => setPage(page + 1)}
+                            className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                        >
+                            Next
+                            <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    )}
+                </div>
+            </div>
+        </>
+    )
+
 }

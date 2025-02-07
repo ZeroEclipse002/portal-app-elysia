@@ -3,6 +3,9 @@ import { Button } from "./ui/button"
 import { Table, TableHeader, TableCell, TableBody, TableRow, TableHead, TableCaption } from "./ui/table"
 import { actions } from "astro:actions"
 import { navigate } from "astro:transitions/client"
+import { useCallback, useState } from "react"
+import { Input } from "./ui/input"
+import _ from "lodash"
 
 interface User {
     id: string
@@ -10,9 +13,15 @@ interface User {
     name: string
     role: string
     approved: boolean
+    family: {
+        id: number
+    }
 }
 
-export const UsersTable = ({ users, page }: { users: User[], page: string }) => {
+export const UsersTable = ({ users, page, searchParams }: { users: User[], page: string, searchParams: string }) => {
+
+    const [search, setSearch] = useState<string>('');
+    const [searchInput, setSearchInput] = useState<string>('');
 
     async function approveUser(userId: string, approved: boolean) {
         try {
@@ -32,8 +41,21 @@ export const UsersTable = ({ users, page }: { users: User[], page: string }) => 
         }
     }
 
+    const debounceFunc = useCallback(_.debounce((e) => {
+        navigate(`/admin?searchUser=${e}`);
+    }, 1000), [search]);
+
+
+    function handleSearch(e: string) {
+        setSearchInput(e);
+        debounceFunc(e);
+    }
+
     return (
         <div className="space-y-4">
+            {searchInput !== search && <p className="text-xs text-gray-500">Searching for {searchInput}</p>}
+            <Input placeholder="Search users" value={searchInput} onChange={(e) => handleSearch(e.target.value)} />
+            {searchParams && <div className="text-sm text-gray-500 p-1">Results for {searchParams} <button className="bg-blue-500 text-white px-2 py-1 rounded-md" onClick={() => navigate(`/admin`)}>Clear</button></div>}
             <div className="rounded-md border">
                 <Table>
                     <TableCaption>Users</TableCaption>
@@ -42,6 +64,7 @@ export const UsersTable = ({ users, page }: { users: User[], page: string }) => 
                             <TableHead>Name</TableHead>
                             <TableHead>Email</TableHead>
                             <TableHead>Role</TableHead>
+                            <TableHead>Family Reg Status</TableHead>
                             <TableHead>Approved</TableHead>
                             <TableHead>Actions</TableHead>
                         </TableRow>
@@ -52,6 +75,7 @@ export const UsersTable = ({ users, page }: { users: User[], page: string }) => 
                                 <TableCell>{user.name}</TableCell>
                                 <TableCell>{user.email}</TableCell>
                                 <TableCell>{user.role}</TableCell>
+                                <TableCell>{user.family?.id ? 'Registed' : 'Not Registered'}</TableCell>
                                 <TableCell>{user.approved ? 'Yes' : 'No'}</TableCell>
                                 <TableCell className="flex gap-2">
                                     <a href={`/admin/users/${user.id}`}>

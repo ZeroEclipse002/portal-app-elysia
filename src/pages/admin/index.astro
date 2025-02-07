@@ -14,7 +14,7 @@ if (Astro.locals.user?.role !== "admin") {
 }
 
 const page = Astro.url.searchParams.get("usersPage") || "1";
-const postsPage = Astro.url.searchParams.get("postsPage") || "1";
+const search = Astro.url.searchParams.get("searchUser") || "";
 
 const [posts, users] = await Promise.all([
   db.query.posts.findMany({
@@ -32,12 +32,20 @@ const [posts, users] = await Promise.all([
     },
   }),
   db.query.user.findMany({
+    where: (table, { ilike }) => ilike(table.name, `%${search}%`),
     columns: {
       id: true,
       name: true,
       email: true,
       role: true,
       approved: true,
+    },
+    with: {
+      family: {
+        columns: {
+          id: true,
+        },
+      },
     },
     limit: 10,
     offset: (parseInt(page) - 1) * 10,
@@ -71,7 +79,12 @@ console.log(transformedPosts);
         class="rounded-xl bg-white p-8 col-span-2 shadow-sm border border-slate-100 transition-all hover:shadow-md"
       >
         <h2 class="text-2xl font-semibold text-slate-800 mb-6">Users</h2>
-        <UsersTable page={page} users={users} client:load />
+        <UsersTable
+          page={page}
+          users={users}
+          searchParams={search}
+          client:load
+        />
       </div>
 
       <div
