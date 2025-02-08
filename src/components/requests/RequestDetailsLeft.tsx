@@ -12,6 +12,9 @@ import { actions } from "astro:actions";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Switch } from "../ui/switch";
+import { DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger, Drawer as DrawerRoot } from "../ui/drawer";
+import { cn } from "@/lib/utils";
+import DocxFiller from "./DocxFiller";
 
 const fetcher = (url: string) => fetch(url).then(res => {
     return res.json()
@@ -22,6 +25,7 @@ export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, 
     const { data: request, isLoading, error } = useSWR(`/api/request/${requestId}`, fetcher)
     const { mutate } = useSWRConfig()
     const [status, setStatus] = useState<"submitted" | "reviewed" | "approved" | "rejected" | undefined>(request?.request.status)
+    const [type, setType] = useState<"urgent" | "normal" | "form" | undefined>('normal')
 
     if (error) {
         return <div>Error loading request</div>
@@ -76,16 +80,17 @@ export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, 
         e.preventDefault()
         const formData = new FormData(e.target as HTMLFormElement)
         const message = formData.get("message") as string
-        const type = formData.get("type") as string
         const status = formData.get("status") as string
         const hasChat = formData.get("hasChat") as string
+        const formType = formData.get("formtype") as string
 
         try {
             const res = actions.admin.addRequestUpdate({
                 message,
-                type: type as "urgent" | "normal",
+                type: type as "urgent" | "normal" | "form",
                 status: status as "submitted" | "reviewed" | "approved" | "rejected",
                 requestId,
+                formType: formType as "residence" | "indigency" | "clearance",
                 closedChat: hasChat !== "on" ? true : false
             })
 
@@ -111,7 +116,8 @@ export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, 
 
     return (
         <div className="w-full lg:w-[40%] border rounded-xl shrink-0">
-            <div className="space-y-6 relative">
+            <div className="space-y-6 relative overflow-hidden">
+                <Drawer request={request} />
                 {/* Header Section */}
                 <div className="px-6 py-4 bg-white rounded-t-xl border-b">
                     <div className="flex items-center gap-3 mb-3">
@@ -170,25 +176,39 @@ export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, 
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="hasChat" className="text-sm font-medium text-gray-700">Has Chat?</Label>
-                                        <Switch 
-                                            name="hasChat" 
+                                        <Switch
+                                            name="hasChat"
                                             checked={status === 'approved' || status === 'rejected' ? false : undefined}
-                                            disabled={status === 'approved' || status === 'rejected'} 
-                                            className="mt-1" 
+                                            disabled={status === 'approved' || status === 'rejected'}
+                                            className="mt-1"
                                         />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="type" className="text-sm font-medium text-gray-700">Type</Label>
-                                        <Select name="type">
+                                        <Select value={type} onValueChange={(value) => setType(value as "urgent" | "normal" | "form")}>
                                             <SelectTrigger className="w-full bg-white border border-gray-100 rounded-lg">
                                                 <SelectValue placeholder="Select Type" />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="urgent">Urgent</SelectItem>
                                                 <SelectItem value="normal">Normal</SelectItem>
+                                                <SelectItem value="form">Form</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
+                                    {type === 'form' && (<div className="space-y-2 bg-slate-50 p-2 rounded-lg">
+                                        <Label htmlFor="formtype" className="text-sm font-medium text-gray-700">Type</Label>
+                                        <Select name="formtype">
+                                            <SelectTrigger className="w-full bg-white border border-gray-100 rounded-lg">
+                                                <SelectValue placeholder="Select Form Type" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="residence">Residence</SelectItem>
+                                                <SelectItem value="indigency">Indigency</SelectItem>
+                                                <SelectItem value="clearance">Clearance</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>)}
                                     <div className="space-y-2">
                                         <Label htmlFor="status" className="text-sm font-medium text-gray-700">Status</Label>
                                         <Select
@@ -280,5 +300,33 @@ export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, 
                 </div>
             </div>
         </div>
+    )
+}
+
+
+const Drawer = ({ request }: { request: any }) => {
+
+    const [open, setOpen] = useState(false)
+
+    return (
+        <DrawerRoot open={open} onOpenChange={setOpen}>
+            <DrawerTrigger className={cn("absolute top-0 right-24 transition-all duration-300", open && "-translate-y-16")} asChild>
+                <Button variant="outline" className="border-t-0 rounded-t-none border-dashed">Generate Document</Button>
+            </DrawerTrigger>
+            <DrawerContent className="h-[90vh]">
+                <DrawerHeader>
+                    <DrawerTitle>Generate Document</DrawerTitle>
+                    <DrawerDescription>Please fill up the form below to generate a document.</DrawerDescription>
+                </DrawerHeader>
+                <DocxFiller />
+                <DrawerFooter>
+                    <Button>Submit</Button>
+                    <DrawerClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                    </DrawerClose>
+                </DrawerFooter>
+            </DrawerContent>
+        </DrawerRoot>
+
     )
 }

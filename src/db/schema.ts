@@ -122,7 +122,7 @@ export const requestUpdates = pgTable("request_updates", {
     id: uuid("id").primaryKey().defaultRandom(),
     requestId: uuid("request_id").references(() => requests.id, { onDelete: 'cascade' }),
     message: text("message").notNull(),
-    type: text("type", { enum: ['urgent', 'normal'] }).notNull(),
+    type: text("type", { enum: ['urgent', 'normal', 'form'] }).notNull(),
     updateClose: boolean("update_close").notNull().default(false),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow()
@@ -133,6 +133,23 @@ export const requestUpdatesChat = pgTable("request_updates_chat", {
     requestLogId: uuid("request_id").references(() => requestUpdates.id, { onDelete: 'cascade' }),
     userId: text("user_id").references(() => user.id, { onDelete: 'cascade' }),
     message: text("message").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+})
+
+export const requestUpdateForm = pgTable("request_update_form", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    requestId: uuid("request_id").references(() => requestUpdates.id, { onDelete: 'cascade' }),
+    userId: text("user_id").references(() => user.id, { onDelete: 'cascade' }),
+    docType: text("doc_type", { enum: ['clearance', 'indigency', 'residence'] }).notNull(),
+    form: jsonb("form").$type<{
+        fullName: string;
+        birthDate: string;
+        birthPlace: string;
+        currentAddress: string;
+        completeAddress: string;
+        purpose: string;
+        yearsOfResidence?: string; // New field for residence certificate
+    }>(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
 })
 
@@ -188,6 +205,10 @@ export const userRelations = relations(user, ({ many, one }) => ({
     posts: many(posts),
     feedBack: many(feedBack),
     concerns: many(concernBoard),
+    details: one(userDetails, {
+        fields: [user.id],
+        references: [userDetails.userId]
+    }),
     family: one(familyData, {
         fields: [user.id],
         references: [familyData.userId]
@@ -229,7 +250,14 @@ export const requestRelations = relations(requests, ({ one, many }) => ({
         fields: [requests.userId],
         references: [user.id]
     }),
-    updates: many(requestUpdates)
+    updates: many(requestUpdates),
+}))
+
+export const requestUpdateFormRelations = relations(requestUpdateForm, ({ one }) => ({
+    request: one(requestUpdates, {
+        fields: [requestUpdateForm.requestId],
+        references: [requestUpdates.id]
+    })
 }))
 
 export const requestUpdatesChatRelations = relations(requestUpdatesChat, ({ one }) => ({
@@ -248,7 +276,11 @@ export const requestUpdateRelations = relations(requestUpdates, ({ one, many }) 
         fields: [requestUpdates.requestId],
         references: [requests.id]
     }),
-    chatrecord: many(requestUpdatesChat)
+    chatrecord: many(requestUpdatesChat),
+    form: one(requestUpdateForm, {
+        fields: [requestUpdates.id],
+        references: [requestUpdateForm.requestId]
+    })
 }))
 
 export const concernRelations = relations(concernBoard, ({ one }) => ({
@@ -276,6 +308,7 @@ export type DownloadableResourcesType = typeof downloadableContent.$inferSelect
 export type Ticket = typeof requests.$inferSelect
 export type TicketUpdate = typeof requestUpdates.$inferSelect
 export type PriorityPost = typeof priority.$inferSelect
+export type FormLog = typeof requestUpdateForm.$inferSelect
 
 export interface PriorityPostWithPost extends Omit<PriorityPost, 'id'> {
     post: Pick<Post, 'title'>

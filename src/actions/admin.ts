@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { downloadableContent, highlights, postContent, posts, priority, requests, requestUpdates, sectionSequence, user } from "@/db/schema";
+import { downloadableContent, highlights, postContent, posts, priority, requests, requestUpdateForm, requestUpdates, sectionSequence, user } from "@/db/schema";
 import { generateId } from "@/lib/utils";
 import { utapi } from "@/utconfig/uploadthing";
 import { ActionError, defineAction, type ActionAPIContext } from "astro:actions";
@@ -387,9 +387,12 @@ export const admin = {
         input: z.object({
             requestId: z.string(),
             message: z.string(),
-            type: z.enum(['urgent', 'normal']),
+            type: z.enum(['urgent', 'normal', 'form']),
             status: z.enum(['submitted', 'reviewed', 'approved', 'rejected']),
+            formType: z.enum(['residence', 'indigency', 'clearance']).optional(),
             closedChat: z.boolean().default(true)
+        }).refine((e) => e.type === 'form' && e.formType !== undefined, {
+            message: 'Please select a form type'
         }),
         handler: async (input, context) => {
             authMiddleware(context)
@@ -405,12 +408,21 @@ export const admin = {
                     })
                 }
 
+
                 const [reqUp] = await tx.insert(requestUpdates).values({
                     requestId: input.requestId,
                     message: input.message,
                     type: input.type,
                     updateClose: input.closedChat,
                 }).returning()
+
+                if (input.type === 'form') {
+                    await tx.insert(requestUpdateForm).values({
+                        requestId: reqUp.id,
+                        docType: input.formType as 'clearance' | 'indigency' | 'residence',
+                        userId: request.userId,
+                    })
+                }
 
                 if (input.status !== request.status) {
                     await tx.update(requests).set({
@@ -422,7 +434,6 @@ export const admin = {
                     success: true,
                     requestUpdate: reqUp
                 }
-
             })
 
             return reqUpdate

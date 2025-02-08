@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { concernBoard, familyData, requests, requestUpdatesChat, sectionSequence, user, userDetails } from "@/db/schema";
+import { concernBoard, familyData, requests, requestUpdateForm, requestUpdatesChat, sectionSequence, user, userDetails } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { ActionError, defineAction, type ActionAPIContext } from "astro:actions";
 import { z } from "astro:schema";
@@ -290,6 +290,88 @@ export const server = {
                 }
             } catch (error) {
                 console.error('Error sending message:', error)
+                throw error
+            }
+        }
+    }),
+    submitForm: defineAction({
+        accept: 'json',
+        input: z.object({
+            requestUpdateId: z.string(),
+            requestFormLogId: z.string(),
+            formType: z.enum(['residence', 'indigency', 'clearance']),
+            form: z.object({
+                fullName: z.string(),
+                birthDate: z.coerce.date().refine(date => new Date(date) < new Date(), {
+                    message: 'Birth date must be in the past'
+                }),
+                completeAddress: z.string(),
+                purpose: z.string(),
+                yearsOfResidence: z.string().optional(),
+                birthPlace: z.string(),
+                currentAddress: z.string(),
+            })
+        }).refine((e) => e.formType === 'residence' && e.form.yearsOfResidence !== undefined, {
+            message: 'Please specify the years of residence',
+            path: ['form', 'yearsOfResidence']
+        }),
+        handler: async (input, context) => {
+            try {
+                await ApprovedMiddleware(context)
+
+                console.log(input)
+
+                const request = await db.query.requestUpdates.findFirst({
+                    where: (table, { eq }) => eq(table.id, input.requestUpdateId),
+                    with: {
+                        form: true,
+                        request: {
+                            columns: {
+                                userId: true
+                            }
+                        }
+                    }
+                })
+
+                if (!request) {
+                    throw new ActionError({
+                        code: 'BAD_REQUEST',
+                        message: 'Request not found'
+                    })
+                }
+
+                // if (request.request?.userId !== context.locals.user?.id) {
+                //     throw new ActionError({
+                //         code: 'BAD_REQUEST',
+                //         message: 'You are not authorized to submit this form'
+                //     })
+                // }
+
+                if (request.form.form !== null) {
+                    throw new ActionError({
+                        code: 'BAD_REQUEST',
+                        message: 'Form already submitted'
+                    })
+                }
+
+                const [form] = await db.update(requestUpdateForm).set({
+                    form: { ...input.form, birthDate: input.form.birthDate.toISOString().split('T')[0] },
+                    createdAt: new Date(),
+                }).where(eq(requestUpdateForm.id, input.requestFormLogId)).returning()
+
+                if (!form) {
+                    throw new ActionError({
+                        code: 'INTERNAL_SERVER_ERROR',
+                        message: 'Failed to update form'
+                    })
+                }
+
+                return {
+                    success: true,
+                    message: 'Form submitted successfully'
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error)
                 throw error
             }
         }

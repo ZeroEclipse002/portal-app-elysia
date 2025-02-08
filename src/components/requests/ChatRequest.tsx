@@ -8,7 +8,7 @@ import { useTransition } from "react"
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
-export const ChatRequest = ({ requestUpdateId, userId }: { requestUpdateId: string, userId: string }) => {
+export const ChatRequest = ({ requestUpdateId, userId, isAdmin }: { requestUpdateId: string, userId: string, isAdmin: boolean }) => {
 
     const { data: chats, isLoading, error, mutate } = useSWR(`/api/tickets/chatrequests/${requestUpdateId}`, fetcher, { refreshInterval: 1000 })
     const [pending, startTransition] = useTransition()
@@ -66,7 +66,7 @@ export const ChatRequest = ({ requestUpdateId, userId }: { requestUpdateId: stri
                             <div className={`flex flex-col gap-1 max-w-[80%] ${chat.userId === userId ? 'items-end' : 'items-start'}`}>
                                 <div className="flex items-center gap-2 px-2">
                                     <span className="text-xs font-medium text-gray-500">
-                                        {chat.userId === userId ? "You" : "Admin"}
+                                        {(isAdmin && chat.userId === userId) ? "You" : "Admin"}
                                     </span>
                                     <time className="text-xs text-gray-400">
                                         {new Date(chat.createdAt).toLocaleTimeString([], {

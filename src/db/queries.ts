@@ -46,6 +46,9 @@ export const getRequest = db.query.requests.findFirst({
         user: {
             columns: {
                 name: true
+            },
+            with: {
+                details: true,
             }
         }
     }
@@ -60,6 +63,9 @@ export const getAllRequests = db.query.requests.findMany({
 export const getRequestLogs = db.query.requestUpdates.findMany({
     where: (table, { eq, sql }) => eq(table.requestId, sql.placeholder("requestId")),
     orderBy: (table, { desc }) => desc(table.createdAt),
+    with: {
+        form: true
+    }
 }).prepare('getRequestLogs')
 
 
