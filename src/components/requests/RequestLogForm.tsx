@@ -56,7 +56,6 @@ export const RequestLogForm = ({ logFormData, docType, requestLogId, requestId, 
                 mutate(`/api/requestlogs/${requestId}`)
             }
         })
-
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

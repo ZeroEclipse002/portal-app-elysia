@@ -311,9 +311,6 @@ export const server = {
                 birthPlace: z.string(),
                 currentAddress: z.string(),
             })
-        }).refine((e) => e.formType === 'residence' && e.form.yearsOfResidence !== undefined, {
-            message: 'Please specify the years of residence',
-            path: ['form', 'yearsOfResidence']
         }),
         handler: async (input, context) => {
             try {

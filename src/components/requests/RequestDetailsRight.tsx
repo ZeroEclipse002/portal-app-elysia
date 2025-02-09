@@ -12,6 +12,9 @@ import { actions } from "astro:actions"
 import { toast } from "sonner"
 import { useState } from "react"
 import { RequestLogForm } from "./RequestLogForm"
+import { DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger, Drawer as DrawerRoot } from "../ui/drawer";
+import DocxFiller from "./DocxFiller"
+import _ from "lodash"
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
@@ -68,8 +71,14 @@ export const RequestDetailsRight = ({ requestId, userId, isAdmin }: { requestId:
         })
     }
 
+    const requestLogsForm = _.chain(requestLogs.requestLogs)
+        .filter(item => item.form != null)
+        .map(item => item.form)
+        .value()
+
     return (
-        <div className="flex-1 border rounded-xl p-6 ">
+        <div className="flex-1 border rounded-xl p-6 relative overflow-hidden">
+            <Drawer requestLogsForm={requestLogsForm} />
             <h2 className="text-2xl font-bold text-gray-900 mb-8">
                 Request Timelines
             </h2>
@@ -238,5 +247,32 @@ export const RequestDetailsRight = ({ requestId, userId, isAdmin }: { requestId:
                 }
             </div>
         </div>
+    )
+}
+
+
+const Drawer = ({ requestLogsForm }: { requestLogsForm: FormLog[] }) => {
+
+    const [open, setOpen] = useState(false)
+
+    return (
+        <DrawerRoot open={open} onOpenChange={setOpen}>
+            <DrawerTrigger className={cn("absolute top-0 right-24 transition-all duration-300", open && "-translate-y-16")} asChild>
+                <Button variant="outline" className="border-t-0 rounded-t-none border-dashed">Generate Document</Button>
+            </DrawerTrigger>
+            <DrawerContent className="h-[90vh] p-4">
+                <DrawerHeader>
+                    <DrawerTitle>Generate Document</DrawerTitle>
+                    <DrawerDescription>Please fill up the form below to generate a document.</DrawerDescription>
+                </DrawerHeader>
+                <DocxFiller requestLogsForm={requestLogsForm} />
+                <DrawerFooter>
+                    <DrawerClose asChild>
+                        <Button variant="outline">Close</Button>
+                    </DrawerClose>
+                </DrawerFooter>
+            </DrawerContent>
+        </DrawerRoot>
+
     )
 }

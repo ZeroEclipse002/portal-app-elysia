@@ -12,9 +12,6 @@ import { actions } from "astro:actions";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Switch } from "../ui/switch";
-import { DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger, Drawer as DrawerRoot } from "../ui/drawer";
-import { cn } from "@/lib/utils";
-import DocxFiller from "./DocxFiller";
 
 const fetcher = (url: string) => fetch(url).then(res => {
     return res.json()
@@ -116,8 +113,7 @@ export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, 
 
     return (
         <div className="w-full lg:w-[40%] border rounded-xl shrink-0">
-            <div className="space-y-6 relative overflow-hidden">
-                <Drawer request={request} />
+            <div className="space-y-6 relative ">
                 {/* Header Section */}
                 <div className="px-6 py-4 bg-white rounded-t-xl border-b">
                     <div className="flex items-center gap-3 mb-3">
@@ -304,29 +300,3 @@ export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, 
 }
 
 
-const Drawer = ({ request }: { request: any }) => {
-
-    const [open, setOpen] = useState(false)
-
-    return (
-        <DrawerRoot open={open} onOpenChange={setOpen}>
-            <DrawerTrigger className={cn("absolute top-0 right-24 transition-all duration-300", open && "-translate-y-16")} asChild>
-                <Button variant="outline" className="border-t-0 rounded-t-none border-dashed">Generate Document</Button>
-            </DrawerTrigger>
-            <DrawerContent className="h-[90vh]">
-                <DrawerHeader>
-                    <DrawerTitle>Generate Document</DrawerTitle>
-                    <DrawerDescription>Please fill up the form below to generate a document.</DrawerDescription>
-                </DrawerHeader>
-                <DocxFiller />
-                <DrawerFooter>
-                    <Button>Submit</Button>
-                    <DrawerClose asChild>
-                        <Button variant="outline">Cancel</Button>
-                    </DrawerClose>
-                </DrawerFooter>
-            </DrawerContent>
-        </DrawerRoot>
-
-    )
-}
