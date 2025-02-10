@@ -3,4 +3,4 @@
       "path": "/api/clean-expired-requests",
       "schedule": "* * * * *"
     }]
-  }
+}
