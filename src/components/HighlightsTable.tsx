@@ -6,11 +6,10 @@ import { Dialog, DialogTitle, DialogHeader, DialogContent, DialogTrigger, Dialog
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
 import { useState, useTransition } from "react"
-import { cn } from "@/lib/utils"
+import { cn, fetcher } from "@/lib/utils"
 import { actions } from "astro:actions"
 import { toast } from "sonner"
 
-export const fetcher = async (url: string) => fetch(url).then(res => res.json())
 
 export const HighlightsTable = () => {
 

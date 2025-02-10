@@ -1,9 +1,9 @@
-import { fetchClient, fetcher } from "@/lib/utils";
+import { fetcher } from "@/lib/utils";
 import useSWR from "swr"
 
 
-export const AnnouncementFeed = () => {
-    const { data, error, isLoading, isValidating } = useSWR('/api/feed/announcements', fetcher)
+export const NewsFeed = () => {
+    const { data, error, isLoading, isValidating } = useSWR('/api/feed/news', fetcher)
 
     if (isLoading) {
         return (
@@ -30,9 +30,12 @@ export const AnnouncementFeed = () => {
             <div className="container mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {data?.map((announcement: any) => (
-                        <div key={announcement.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md hover:border-blue-100">
+                        <a href={`/post/${announcement.id}`} key={announcement.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md hover:border-blue-100">
                             <div className="aspect-video relative overflow-hidden">
                                 <img
+                                    style={{
+                                        viewTransitionName: "post-image-" + announcement.id
+                                    }}
                                     src={announcement.image}
                                     alt={announcement.title}
                                     className="w-full h-full object-cover transition-transform hover:scale-105"
@@ -45,7 +48,7 @@ export const AnnouncementFeed = () => {
                                     {new Date(announcement.createdAt).toLocaleDateString()}
                                 </time>
                             </div>
-                        </div>
+                        </a>
                     ))}
                 </div>
                 {isValidating && (

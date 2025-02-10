@@ -4,8 +4,7 @@ import useSWR from "swr"
 import type { Block } from "@blocknote/core";
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";
-
-const fetcher = (url: string) => fetch(url).then(res => res.json())
+import { fetcher } from "@/lib/utils";
 
 export const MainViewer = ({ postId }: { postId: string }) => {
     const { data, error, isLoading } = useSWR(`/api/feed/post/${postId}`, fetcher)

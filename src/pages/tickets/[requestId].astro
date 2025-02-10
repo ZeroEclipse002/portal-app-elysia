@@ -1,10 +1,5 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { cn, fetchClient } from "@/lib/utils";
-import { Debug } from "astro:components";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import type { Ticket, TicketUpdate } from "@/db/schema";
 import { RequestDetailsLeft } from "@/components/requests/RequestDetailsLeft";
 import { RequestDetailsRight } from "@/components/requests/RequestDetailsRight";
 
@@ -17,25 +12,6 @@ if (!requestId) {
 if (!Astro.locals.user) {
   return Astro.redirect("/tickets");
 }
-
-let request;
-try {
-  const response = await fetchClient.api
-    .request({ requestId: requestId as string })
-    .get({
-      headers: Object.fromEntries(Astro.request.headers.entries()),
-    });
-
-  console.log("resq", response.data.request.user.id);
-
-  request = response.data.request;
-} catch (error) {
-  return Astro.redirect("/tickets?error=failed-to-load");
-}
-
-if (!request) {
-  return Astro.redirect("/tickets?error=not-found");
-}
 ---
 
 <Layout>
@@ -45,7 +21,6 @@ if (!request) {
       requestId={requestId}
       client:only="react"
     />
-
     <RequestDetailsRight
       requestId={requestId}
       isAdmin={Astro.locals.user?.role === "admin"}

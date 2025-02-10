@@ -1,5 +1,5 @@
 import type { FormLog, TicketUpdate } from "@/db/schema"
-import { cn } from "@/lib/utils"
+import { cn, fetcher } from "@/lib/utils"
 import useSWR from "swr"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion"
 import { ChatRequest } from "./ChatRequest"
@@ -15,8 +15,6 @@ import { RequestLogForm } from "./RequestLogForm"
 import { DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger, Drawer as DrawerRoot } from "../ui/drawer";
 import DocxFiller from "./DocxFiller"
 import _ from "lodash"
-
-const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 interface RequestLogWithForm extends TicketUpdate {
     form: FormLog

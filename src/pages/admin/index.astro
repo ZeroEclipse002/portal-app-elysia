@@ -8,66 +8,12 @@ import { RequestsTable } from "@/components/requests/RequestsTable";
 import { sql } from "drizzle-orm";
 import { HighlightsTable } from "@/components/HighlightsTable";
 import { DownloadableTable } from "@/components/DownloadableTable";
+import { getPosts } from "@/db/queries";
+import PostsTableNest from "@/components/PostsTableNest.astro";
 
 if (Astro.locals.user?.role !== "admin") {
   return Astro.redirect("/");
 }
-
-const page = Astro.url.searchParams.get("usersPage") || "1";
-const search = Astro.url.searchParams.get("searchUser") || "";
-
-const [posts, users] = await Promise.all([
-  db.query.posts.findMany({
-    with: {
-      user: {
-        columns: {
-          name: true,
-        },
-      },
-      priority: {
-        columns: {
-          priority: true,
-        },
-      },
-    },
-  }),
-  db.query.user.findMany({
-    where: (table, { ilike }) => ilike(table.name, `%${search}%`),
-    columns: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      approved: true,
-    },
-    with: {
-      family: {
-        columns: {
-          id: true,
-        },
-      },
-    },
-    limit: 10,
-    offset: (parseInt(page) - 1) * 10,
-  }),
-]);
-
-const transformedPosts = posts.map((post) => ({
-  ...post,
-  priority: post.priority !== null,
-}));
-
-const priorityPosts = posts
-  .filter((post) => post.priority)
-  .map((post) => ({
-    postId: post.id,
-    priority: post.priority?.priority ?? 0,
-    post: {
-      title: post.title,
-    },
-  }));
-
-console.log(transformedPosts);
 ---
 
 <Layout>
@@ -79,19 +25,24 @@ console.log(transformedPosts);
         class="rounded-xl bg-white p-8 col-span-2 shadow-sm border border-slate-100 transition-all hover:shadow-md"
       >
         <h2 class="text-2xl font-semibold text-slate-800 mb-6">Users</h2>
-        <UsersTable
-          page={page}
-          users={users}
-          searchParams={search}
-          client:load
-        />
+        <UsersTable client:only="react" />
       </div>
 
       <div
         class="rounded-xl bg-white p-8 shadow-sm border border-slate-100 transition-all hover:shadow-md"
       >
         <h2 class="text-2xl font-semibold text-slate-800 mb-6">Posts</h2>
-        <PostsTable posts={transformedPosts} client:only="react" />
+        <PostsTableNest server:defer>
+          <div
+            slot="fallback"
+            class="flex items-center justify-center h-full my-10"
+          >
+            <div
+              class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"
+            >
+            </div>
+          </div>
+        </PostsTableNest>
       </div>
 
       <div
@@ -100,14 +51,14 @@ console.log(transformedPosts);
         <h2 class="text-2xl font-semibold text-slate-800 mb-6">
           Priority Posts
         </h2>
-        <PriorityPostsTable client:load />
+        <PriorityPostsTable client:only="react" />
       </div>
       <div
         class="rounded-xl bg-white p-8 shadow-sm border border-slate-100 transition-all hover:shadow-md"
       >
         <h2 class="text-2xl font-semibold text-slate-800 mb-6">Highlights</h2>
         <p>Add highlights here such as simple pictures with short captions</p>
-        <HighlightsTable client:load />
+        <HighlightsTable client:only="react" />
       </div>
       <div
         class="rounded-xl bg-white p-8 shadow-sm border border-slate-100 transition-all hover:shadow-md"
@@ -116,7 +67,7 @@ console.log(transformedPosts);
           Downloadable Content
         </h2>
         <p>Add downloadable content here such as pdfs, documents, etc.</p>
-        <DownloadableTable client:load />
+        <DownloadableTable client:only="react" />
       </div>
     </section>
   </main>

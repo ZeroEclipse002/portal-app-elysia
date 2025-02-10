@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Image } from 'astro:assets';
 import useSWR from 'swr';
 import type { HighlightsType } from '@/db/schema';
+import { fetcher } from '@/lib/utils';
 
 interface CarouselItem {
     image: string;
@@ -11,8 +12,6 @@ interface CarouselItem {
 interface CarouselProps {
     data: CarouselItem[];
 }
-
-const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 export default function CarouselComponent({ data }: CarouselProps) {
     const [currentIndex, setCurrentIndex] = useState(0);

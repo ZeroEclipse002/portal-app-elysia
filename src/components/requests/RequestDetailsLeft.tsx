@@ -12,10 +12,8 @@ import { actions } from "astro:actions";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Switch } from "../ui/switch";
+import { fetcher } from "@/lib/utils";
 
-const fetcher = (url: string) => fetch(url).then(res => {
-    return res.json()
-})
 
 export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, isAdmin: boolean }) => {
 

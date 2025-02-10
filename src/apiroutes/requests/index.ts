@@ -4,16 +4,20 @@ import { getRequests, getRequest, getRequestLogs, getUserFamily } from '@/db/que
 import { utapi } from '@/utconfig/uploadthing';
 import _ from 'lodash';
 import { userMiddleware } from '../auth';
+import { db } from '@/db';
 
 export const requestRoutes = new Elysia()
     .derive(({ request }) => userMiddleware(request))
     .group('/api', app => app
-        .get('/requests', async ({ user }) => {
+        .get('/requests', async ({ user, query }) => {
             if (!user) {
                 throw new Error('Unauthorized');
             }
 
-            const requests = await getRequests.execute({ userId: user.id });
+            const page = parseInt(query.page ?? '1');
+
+            const requests = await getRequests.execute({ userId: user.id, limit: 10, offset: (page - 1) * 10 });
+
             return requests;
         }, {
             detail: {
@@ -168,5 +172,25 @@ export const requestRoutes = new Elysia()
                     }
                 }
             }
+        })
+        .get("/chatrequests/:requestUpdateId", async ({ params, user }) => {
+            if (!params.requestUpdateId) {
+                throw new Error('Request ID is required');
+            }
+            if (!user) {
+                throw new Error('Unauthorized');
+            }
+            const chat = await db.query.requestUpdates.findFirst({
+                where: (table, { eq }) => eq(table.id, params.requestUpdateId as string),
+                with: {
+                    chatrecord: true
+                }
+            })
+            console.log(chat);
+            // throw new Error('Not implemented');
+            // const chats = await getChatRequests.execute({ requestUpdateId: params.requestUpdateId as string })
+            return {
+                chat
+            };
         })
     );

@@ -37,7 +37,9 @@ export const getUserFamily = db.query.familyData.findFirst({
 }).prepare('getUserFamily')
 
 export const getRequests = db.query.requests.findMany({
-    where: (table, { eq, sql }) => eq(table.userId, sql.placeholder("userId"))
+    where: (table, { eq, sql }) => eq(table.userId, sql.placeholder("userId")),
+    limit: sql.placeholder('limit'),
+    offset: sql.placeholder('offset'),
 }).prepare('getRequests')
 
 export const getRequest = db.query.requests.findFirst({
@@ -84,10 +86,43 @@ export const getPosts = db.query.posts.findMany({
     },
 }).prepare('getPosts')
 
+export const getPriorityPostsAdmin = db.query.posts.findMany({
+    with: {
+        user: {
+            columns: {
+                name: true,
+            },
+        },
+        priority: {
+            columns: {
+                priority: true,
+            },
+        },
+    },
+    columns: {
+        id: true,
+        title: true,
+    }
+}).prepare('getPriorityPostsAdmin')
+
+
+
+
 
 export const getHighlights = db.query.highlights.findMany().prepare('getHighlights')
 
 export const getDownloadableResources = db.query.downloadableContent.findMany().prepare('getDownloadableResources')
+
+export const GetAllNews = db.query.posts.findMany({
+    where: (table, { eq }) => eq(table.public, true),
+    orderBy: (table, { desc }) => [desc(table.createdAt)],
+}).prepare('getAllNews')
+
+export const GetAllAnnouncements = db.query.posts.findMany({
+    where: (table, { eq }) => eq(table.type, 'announcement'),
+    orderBy: (table, { desc }) => [desc(table.createdAt)],
+}).prepare('getAllAnnouncements')
+
 
 export const getLatestAnnouncementAndNews = db.execute(sql`
   SELECT * FROM (
@@ -96,3 +131,24 @@ export const getLatestAnnouncementAndNews = db.execute(sql`
     (SELECT * FROM posts WHERE type = 'news' ORDER BY created_at DESC LIMIT 1)
   ) AS latest_posts
 `)
+
+
+export const getUsers = db.query.user.findMany({
+    where: (table, { ilike, sql }) => ilike(table.name, sql.placeholder('search')),
+    columns: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        approved: true,
+    },
+    with: {
+        family: {
+            columns: {
+                id: true,
+            },
+        },
+    },
+    limit: 5,
+    offset: sql.placeholder('page'),
+}).prepare('getUsers')

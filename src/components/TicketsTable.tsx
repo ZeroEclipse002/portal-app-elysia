@@ -3,14 +3,15 @@ import { actions } from "astro:actions"
 import type { Ticket } from "@/db/schema"
 import { Button } from "./ui/button"
 import { navigate } from "astro:transitions/client"
-import { cn } from "@/lib/utils"
+import { cn, fetcher } from "@/lib/utils"
+import { useState } from "react"
 
-const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 preload("/api/requests", fetcher)
 
 export const TicketsTable = () => {
-    const { data, isLoading } = useSWR<Ticket[]>('/api/requests', fetcher)
+    const [page, setPage] = useState<number>(1)
+    const { data, isLoading } = useSWR<Ticket[]>('/api/requests?page=' + page, fetcher)
 
     if (isLoading) {
         return (
@@ -21,7 +22,7 @@ export const TicketsTable = () => {
     }
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 mt-4">
             {/* Active Requests */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="p-6 border-b border-gray-100">
@@ -141,6 +142,34 @@ export const TicketsTable = () => {
                                 ))}
                         </tbody>
                     </table>
+                    <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
+                        <div>
+                            {page > 1 && (
+                                <button
+                                    onClick={() => setPage(page - 1)}
+                                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                                >
+                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                    Previous
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    <div>
+                        {data?.length === 5 && (
+                            <button
+                                onClick={() => setPage(page + 1)}
+                                className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                            >
+                                Next
+                                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

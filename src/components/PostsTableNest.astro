@@ -1,0 +1,13 @@
+---
+import { getPosts } from "@/db/queries";
+import { PostsTable } from "./PostsTable";
+
+const posts = await getPosts.execute();
+
+const transformedPosts = posts.map((post) => ({
+  ...post,
+  priority: post.priority !== null,
+}));
+---
+
+<PostsTable posts={transformedPosts} client:only="react" />

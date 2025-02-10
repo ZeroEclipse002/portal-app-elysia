@@ -1,9 +1,10 @@
 import { Elysia } from 'elysia';
-import { getPosts, getAllRequests, getHighlights, getDownloadableResources, getLatestAnnouncementAndNews } from '@/db/queries';
+import { getPosts, getAllRequests, getHighlights, getDownloadableResources, getLatestAnnouncementAndNews, getUsers, getPriorityPostsAdmin } from '@/db/queries';
 import { db } from '@/db';
 import { userMiddleware } from '../auth';
 import { bearer } from '@elysiajs/bearer'
 import { requests } from '@/db/schema';
+import { cache } from '../utils/cache';
 
 export const adminRoutes = new Elysia()
     .use(bearer())
@@ -18,7 +19,7 @@ export const adminRoutes = new Elysia()
                 throw new Error('Unauthorized');
             }
 
-            const posts = await getPosts.execute();
+            const posts = await getPriorityPostsAdmin.execute();
 
             const priorityPosts = posts
                 .filter((post) => post.priority)
@@ -164,6 +165,37 @@ export const adminRoutes = new Elysia()
                 description: 'Clean expired requests',
                 responses: {
                     200: { description: 'Expired requests cleaned successfully' }
+                }
+            }
+        })
+        .get('/admin/users', async ({ user, query }) => {
+            if (!user) {
+                throw new Error('Unauthorized');
+            }
+
+            if (user.role !== 'admin') {
+                throw new Error('Unauthorized');
+            }
+
+            const pageNumber = parseInt(query.page || '1');
+
+            const usersCache = await cache.get('users' + '-' + pageNumber + '-' + query.searchUser);
+
+            if (usersCache) {
+                return usersCache;
+            }
+
+            const users = await getUsers.execute({ page: (pageNumber - 1) * 5, search: `%${query.searchUser || ''}%` });
+
+            await cache.set('users' + '-' + pageNumber + '-' + query.searchUser, users, { ex: 300 }); // Cache for 5 minutes
+
+            return users;
+        }, {
+            detail: {
+                tags: ['Admin'],
+                description: 'Get all users',
+                responses: {
+                    200: { description: 'Users retrieved successfully' }
                 }
             }
         })

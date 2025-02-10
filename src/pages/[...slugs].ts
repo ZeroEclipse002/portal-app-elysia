@@ -7,15 +7,6 @@ import { adminRoutes } from '@/apiroutes/admin'
 import { cron, Patterns } from '@elysiajs/cron'
 
 const app = new Elysia()
-    .use(
-        cron({
-            name: 'heartbeat',
-            pattern: Patterns.everyMinute(),
-            run() {
-                console.log("Heartbeat")
-            }
-        })
-    )
     .use(swagger({
         documentation: {
             components: {

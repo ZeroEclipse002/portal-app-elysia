@@ -10,8 +10,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { TrashIcon } from "lucide-react";
 import useSWR, { useSWRConfig } from "swr";
-
-const fetcher = (url: string) => fetch(url).then(res => res.json())
+import { fetcher } from "@/lib/utils";
 
 export const PriorityPostsTable = () => {
 

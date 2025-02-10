@@ -1,131 +1,130 @@
 import type { Ticket } from "@/db/schema";
+import { fetcher } from "@/lib/utils";
 import { useState } from "react";
 import useSWR from "swr";
+import { Skeleton } from "../ui/skeleton";
 
 
-const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 const RequestsTableNest = ({ requests, isLoading }: { requests: Ticket[], isLoading: boolean }) => {
 
-    if (isLoading) return <div>Loading...</div>
+    if (isLoading) return (
+        <div className="flex justify-center items-center h-[50vh]">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+    )
 
     return requests && (
         <div>
-            {isLoading ? (
-                <div className="flex justify-center items-center h-32">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            <div className="mb-8">
+                <h2 className="text-xl font-semibold mb-4">Active Requests</h2>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                                >Request ID</th
+                                >
+                                <th
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                                >Type</th
+                                >
+                                <th
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                                >Status</th
+                                >
+                                <th
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                                >Date</th
+                                >
+                                <th
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                                >Action</th
+                                >
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {requests
+                                ?.filter((request: any) => ['submitted', 'reviewed'].includes(request.status))
+                                .map((request: any) => (
+                                    <tr key={request.id}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">#{request.id.slice(0, 8)}...</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{request.type}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${request.status === 'submitted' ? 'bg-yellow-100 text-yellow-800' :
+                                                request.status === 'reviewed' ? 'bg-blue-100 text-blue-800' :
+                                                    'bg-gray-100 text-gray-800'
+                                                }`}>
+                                                {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            {new Date(request.createdAt).toLocaleDateString()}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            <a href={`/tickets/${request.id}`} className="text-blue-500 hover:underline">View</a>
+                                        </td>
+                                    </tr>
+                                ))}
+                        </tbody>
+                    </table>
                 </div>
-            ) : (
-                <>
-                    <div className="mb-8">
-                        <h2 className="text-xl font-semibold mb-4">Active Requests</h2>
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th
-                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                        >Request ID</th
-                                        >
-                                        <th
-                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                        >Type</th
-                                        >
-                                        <th
-                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                        >Status</th
-                                        >
-                                        <th
-                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                        >Date</th
-                                        >
-                                        <th
-                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                        >Action</th
-                                        >
+            </div>
+            <div>
+                <h2 className="text-xl font-semibold mb-4">Request History</h2>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                                >Request ID</th
+                                >
+                                <th
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                                >Type</th
+                                >
+                                <th
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                                >Status</th
+                                >
+                                <th
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                                >Date</th
+                                >
+                                <th
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                                >Action</th
+                                >
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {requests
+                                ?.filter((request: any) => ['approved', 'rejected'].includes(request.status))
+                                .map((request: any) => (
+                                    <tr key={request.id}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">#{request.id.slice(0, 8)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{request.type}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${request.status === 'approved' ? 'bg-green-100 text-green-800' :
+                                                request.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                                                    'bg-gray-100 text-gray-800'
+                                                }`}>
+                                                {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            {new Date(request.createdAt).toLocaleDateString()}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            <a href={`/tickets/${request.id}`} className="text-blue-500 hover:underline">View</a>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {requests
-                                        ?.filter((request: any) => ['submitted', 'reviewed'].includes(request.status))
-                                        .map((request: any) => (
-                                            <tr key={request.id}>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm">#{request.id.slice(0, 8)}...</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm">{request.type}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${request.status === 'submitted' ? 'bg-yellow-100 text-yellow-800' :
-                                                        request.status === 'reviewed' ? 'bg-blue-100 text-blue-800' :
-                                                            'bg-gray-100 text-gray-800'
-                                                        }`}>
-                                                        {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                    {new Date(request.createdAt).toLocaleDateString()}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                    <a href={`/tickets/${request.id}`} className="text-blue-500 hover:underline">View</a>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-semibold mb-4">Request History</h2>
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th
-                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                        >Request ID</th
-                                        >
-                                        <th
-                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                        >Type</th
-                                        >
-                                        <th
-                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                        >Status</th
-                                        >
-                                        <th
-                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                        >Date</th
-                                        >
-                                        <th
-                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                        >Action</th
-                                        >
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {requests
-                                        ?.filter((request: any) => ['approved', 'rejected'].includes(request.status))
-                                        .map((request: any) => (
-                                            <tr key={request.id}>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm">#{request.id.slice(0, 8)}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm">{request.type}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${request.status === 'approved' ? 'bg-green-100 text-green-800' :
-                                                        request.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                                                            'bg-gray-100 text-gray-800'
-                                                        }`}>
-                                                        {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                    {new Date(request.createdAt).toLocaleDateString()}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                    <a href={`/tickets/${request.id}`} className="text-blue-500 hover:underline">View</a>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                </tbody>
-                            </table>
-                            {/* <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
+                                ))}
+                        </tbody>
+                    </table>
+                    {/* <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
                                 <div>
                                     {parseInt(page) > 1 && (
                                         <a
@@ -140,7 +139,7 @@ const RequestsTableNest = ({ requests, isLoading }: { requests: Ticket[], isLoad
                                     )}
                                 </div>
                             </div> */}
-                            {/* <div>
+                    {/* <div>
                                 {requests?.length === 10 && (
                                     <a
                                         href={`/tickets?page=${parseInt(page) + 1}`}
@@ -153,11 +152,8 @@ const RequestsTableNest = ({ requests, isLoading }: { requests: Ticket[], isLoad
                                     </a>
                                 )}
                             </div> */}
-                        </div>
-                    </div>
-                </>
-
-            )}
+                </div>
+            </div>
         </div>
     )
 }

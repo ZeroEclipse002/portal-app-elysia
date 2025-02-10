@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia';
 import { cache } from '../utils/cache';
-import { getConfig, getRecentPosts, getPriorityPosts, getPostContent } from '@/db/queries';
+import { getConfig, getRecentPosts, getPriorityPosts, getPostContent, GetAllNews, GetAllAnnouncements } from '@/db/queries';
 import type { TTLType } from '../types';
 import { userMiddleware } from '../auth';
 
@@ -56,6 +56,35 @@ export const feedRoutes = new Elysia()
                 recent: recentPosts ?? {},
                 priority: priorityPosts ?? {}
             };
+        })
+        .get('/feed/news', async () => {
+
+            const data = await cache.get('news');
+
+            if (data) {
+                return data;
+            } else {
+                const data = await GetAllNews.execute();
+                await cache.set('news', data, { ex: getTTL('recent') });
+                return data;
+            }
+        })
+        .get('/feed/announcements', async () => {
+
+            const data = await cache.get('announcements');
+
+            if (data) {
+
+                return data;
+
+            } else {
+                const data = await GetAllAnnouncements.execute();
+
+                await cache.set('announcements', data, { ex: getTTL('recent') });
+
+                return data;
+            }
+
         })
         .get('/feed/post/:postId', async ({ params }) => {
             const cacheKey = `post:${params.postId}`;

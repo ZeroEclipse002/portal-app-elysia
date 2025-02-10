@@ -4,13 +4,13 @@ import { Input } from "../ui/input"
 import { actions } from "astro:actions"
 import { toast } from "sonner"
 import { useTransition } from "react"
+import { fetcher } from "@/lib/utils"
 
 
-const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 export const ChatRequest = ({ requestUpdateId, userId, isAdmin }: { requestUpdateId: string, userId: string, isAdmin: boolean }) => {
 
-    const { data: chats, isLoading, error, mutate } = useSWR(`/api/tickets/chatrequests/${requestUpdateId}`, fetcher, { refreshInterval: 1000 })
+    const { data: chats, isLoading, error, mutate } = useSWR(`/api/chatrequests/${requestUpdateId}`, fetcher, { refreshInterval: 1000 })
     const [pending, startTransition] = useTransition()
 
     if (isLoading) {
