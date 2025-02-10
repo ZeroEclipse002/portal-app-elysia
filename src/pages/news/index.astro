@@ -1,9 +1,15 @@
 ---
+import { db } from "@/db";
 import Layout from "@/layouts/Layout.astro";
+
+const news = await db.query.posts.findMany({
+  where: (table, { eq }) => eq(table.public, true),
+  orderBy: (table, { desc }) => [desc(table.createdAt)],
+});
 ---
 
 <Layout>
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-2xl font-bold">News</h1>
-    </div>
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold">News</h1>
+  </div>
 </Layout>
