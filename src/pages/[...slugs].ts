@@ -6,7 +6,19 @@ import { requestRoutes } from '@/apiroutes/requests'
 import { adminRoutes } from '@/apiroutes/admin'
 
 const app = new Elysia()
-    .use(swagger())
+    .use(swagger({
+        documentation: {
+            components: {
+                securitySchemes: {
+                    bearerAuth: {
+                        type: 'http',
+                        scheme: 'bearer',
+                        bearerFormat: 'JWT'
+                    }
+                }
+            }
+        }
+    }))
     .use(authRoutes)
     .use(feedRoutes)
     .use(requestRoutes)

@@ -2,8 +2,11 @@ import { Elysia } from 'elysia';
 import { getPosts, getAllRequests, getHighlights, getDownloadableResources, getLatestAnnouncementAndNews } from '@/db/queries';
 import { db } from '@/db';
 import { userMiddleware } from '../auth';
+import { bearer } from '@elysiajs/bearer'
+import { requests } from '@/db/schema';
 
 export const adminRoutes = new Elysia()
+    .use(bearer())
     .derive(({ request }) => userMiddleware(request))
     .group('/api', app => app
         .get('/adminposts', async ({ user }) => {
@@ -138,6 +141,29 @@ export const adminRoutes = new Elysia()
                             }
                         }
                     }
+                }
+            }
+        })
+        .post('/clean-expired-requests', async ({ bearer }) => {
+
+            if (!bearer) {
+                throw new Error('No bearer token');
+            }
+
+            if (bearer !== import.meta.env.CRON_KEY!) {
+                throw new Error('Invalid bearer token');
+            }
+
+            return new Response('Expired requests cleaned successfully', {
+                status: 200
+            });
+        }, {
+            detail: {
+                tags: ['Admin'],
+                security: [{ BearerAuth: [] }],
+                description: 'Clean expired requests',
+                responses: {
+                    200: { description: 'Expired requests cleaned successfully' }
                 }
             }
         })

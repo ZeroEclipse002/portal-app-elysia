@@ -16,6 +16,7 @@
     "@blocknote/core": "^0.22.0",
     "@blocknote/mantine": "^0.22.0",
     "@blocknote/react": "^0.22.0",
+    "@elysiajs/bearer": "^1.2.0",
     "@elysiajs/cron": "^1.2.0",
     "@elysiajs/eden": "^1.2.0",
     "@elysiajs/swagger": "^1.2.0",
