@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 FROM base AS prod-deps
-RUN bun install --omit=dev --legacy-peer-deps
+RUN bun install --legacy-peer-deps
 
 FROM base AS build-deps
 RUN bun install --legacy-peer-deps
