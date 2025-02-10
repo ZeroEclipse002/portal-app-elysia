@@ -79,7 +79,7 @@ export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, 
         const message = formData.get("message") as string
         const status = formData.get("status") as string
         const hasChat = formData.get("hasChat") as string
-        const formType = formData.get("formtype") as string
+        const formType = formData.get("formtype") as string | undefined
 
         try {
             const res = actions.admin.addRequestUpdate({

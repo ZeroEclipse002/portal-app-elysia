@@ -71,6 +71,34 @@ export const RequestDetailsRight = ({ requestId, userId, isAdmin }: { requestId:
         })
     }
 
+    function handleResetForm(e: string) {
+
+        if (!e) {
+            toast.error('Please select a request log')
+        }
+
+        startTransition(async () => {
+            try {
+                const response = await actions.admin.reopenForm({
+                    requestFormId: e,
+                })
+
+                if (response.data) {
+                    toast.success('Form reopened')
+                } else {
+                    toast.error('Error reopening form')
+                }
+
+            } catch (error) {
+                toast.error('Error reopening form')
+                console.error(error)
+            } finally {
+                mutate()
+                return
+            }
+        })
+    }
+
     const requestLogsForm = _.chain(requestLogs.requestLogs)
         .filter(item => item.form != null)
         .map(item => item.form)
@@ -78,7 +106,7 @@ export const RequestDetailsRight = ({ requestId, userId, isAdmin }: { requestId:
 
     return (
         <div className="flex-1 border rounded-xl p-6 relative overflow-hidden">
-            <Drawer requestLogsForm={requestLogsForm} />
+            {isAdmin && (<Drawer requestLogsForm={requestLogsForm} />)}
             <h2 className="text-2xl font-bold text-gray-900 mb-8">
                 Request Timelines
             </h2>
@@ -164,6 +192,11 @@ export const RequestDetailsRight = ({ requestId, userId, isAdmin }: { requestId:
                                                     <p className={cn("px-2 py-1 rounded-full text-xs", log.form.form !== null ? 'bg-green-200' : 'bg-red-200')}>
                                                         {log.form.form !== null ? 'Submitted' : 'Not Submitted'}
                                                     </p>
+                                                    {
+                                                        log.form.form !== null && (
+                                                            <Button variant={'ghost'} className="hover:bg-slate-200" onClick={() => handleCloseChat(log.id)}>Reset Form</Button>
+                                                        )
+                                                    }
                                                 </>
                                             )}
                                         </div>

@@ -41,15 +41,29 @@ export function HeroSectionContent({ recent, priority, initialData }: HeroSectio
 
     return (
         <div className="w-full flex justify-center items-center mb-6">
-            <div className="w-[90vw] md:w-[85vw] lg:w-[80vw] relative min-h-[85vh] rounded-2xl p-8 md:p-16 flex flex-col justify-center items-center shadow-lg backdrop-blur-sm border-2 border-slate-300 border-dashed">
+            <div className="w-[90vw] md:w-[85vw] lg:w-[80vw] overflow-hidden relative min-h-[85vh] rounded-2xl p-8 md:p-16 flex flex-col justify-center items-center shadow-lg backdrop-blur-sm">
+                {data.image && (
+                    <div className="absolute -z-10 inset-0">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30 z-10" />
+                        <img
+                            style={{
+                                viewTransitionName: "post-image-" + data.id
+                            }}
+                            src={data.image}
+                            alt={data.title}
+                            className="w-full h-full object-cover"
+                        />
+                    </div>
+                )}
                 <div className="absolute top-8 left-8 md:top-10 md:left-10">
                     <div className="backdrop-blur-md bg-white/80 rounded-full p-1.5 flex gap-3 shadow-sm border border-slate-100">
                         <button
                             onClick={() => handleStateChange("recent")}
-                            className={`px-4 py-2 rounded-full transition-all duration-300 ${state === "recent"
-                                ? "bg-slate-900 text-white shadow-md"
-                                : "text-slate-600 hover:bg-slate-100"
-                                }`}
+                            className={`px-4 py-2 rounded-full transition-all duration-300 ${
+                                state === "recent"
+                                    ? "bg-slate-900 text-white shadow-md"
+                                    : "text-slate-700 hover:bg-slate-100"
+                            }`}
                         >
                             Recent {recent.length > 0 && <span className="ml-1 text-sm opacity-75">({recent.length})</span>}
                         </button>
@@ -92,12 +106,12 @@ export function HeroSectionContent({ recent, priority, initialData }: HeroSectio
 
                 {isEmptyView ? (
                     <div className="text-center flex flex-col justify-center items-center space-y-8">
-                        <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 bg-clip-text text-transparent">
+                        <h1 className="text-5xl md:text-7xl font-bold text-white">
                             No Content Available
                         </h1>
                         <Badge
                             variant="outline"
-                            className="text-lg md:text-2xl text-slate-600 max-w-3xl text-center font-light tracking-wide px-6 py-3"
+                            className="text-lg md:text-2xl text-white/90 max-w-3xl text-center font-light tracking-wide px-6 py-3"
                         >
                             {state === "recent"
                                 ? "No recent posts available at the moment"
@@ -112,61 +126,66 @@ export function HeroSectionContent({ recent, priority, initialData }: HeroSectio
                         </button>
                     </div>
                 ) : (
-                    <div className="space-y-10 text-center max-w-4xl mx-auto">
+                    <div className="space-y-8 text-center max-w-4xl mx-auto">
                         <div className="mb-4">
-                            <Badge variant="secondary" className="mb-2">
+                            <Badge variant="secondary" className="mb-2 bg-white/20 text-white">
                                 {currentIndex + 1} of {currentArray.length}
                             </Badge>
                         </div>
                         <h1 style={{
                             viewTransitionName: "post-title-" + data.id
-                        }} className={cn(
-                            "text-5xl md:text-7xl font-bold bg-clip-text text-transparent leading-tight",
-                            data.type === "announcement"
-                                ? "bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600"
-                                : "bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600"
-                        )}>
+                        }} className="text-5xl md:text-7xl font-bold text-white leading-tight mb-4">
                             {data.title}
                         </h1>
 
                         <Badge
                             variant="outline"
-                            className={cn(
-                                "text-lg md:text-2xl max-w-3xl text-center font-light tracking-wide px-6 py-3",
-                                data.type === "announcement" ? "text-purple-700" : "text-teal-700"
-                            )}
+                            className="text-lg md:text-2xl max-w-3xl text-center font-light tracking-wide px-6 py-3 text-white/90 border-white/20"
                         >
                             {data.shortDescription || "No short description available"}
                         </Badge>
 
-                        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
+                        <div className="mt-4 text-white/80 max-w-2xl mx-auto">
+                            <p className="text-lg">
+                                Posted on {new Date().toLocaleDateString()} • {data.type === 'announcement' ? 'Important Update' : 'Latest News'}
+                            </p>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center mt-8">
                             <a
                                 href={data.id ? `/post/${data.id}` : "#"}
-                                className={cn(
-                                    "group px-8 py-4 text-white rounded-full transition-all duration-300 shadow-lg hover:shadow-xl text-lg hover:scale-105",
-                                    data.type === "announcement"
-                                        ? "bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500"
-                                        : "bg-gradient-to-br from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500"
-                                )}
+                                className="group px-8 py-4 bg-slate-800 text-white rounded-full transition-all duration-300 shadow-lg hover:shadow-xl text-lg hover:scale-105 hover:bg-slate-700"
                             >
                                 Visit {data.type}
                                 <span className="inline-block transition-transform group-hover:translate-x-1 ml-2">→</span>
                             </a>
                             <a
                                 href={data.id || "#"}
-                                className={cn(
-                                    "px-8 py-4 bg-white/50 backdrop-blur-sm border rounded-full hover:bg-white transition-all duration-300 shadow-sm hover:shadow-md text-lg hover:scale-105",
-                                    data.type === "announcement"
-                                        ? "border-purple-200 hover:border-purple-300 text-purple-700"
-                                        : "border-teal-200 hover:border-teal-300 text-teal-700"
-                                )}
+                                className="px-8 py-4 bg-white/50 backdrop-blur-sm border border-slate-200 rounded-full hover:bg-white transition-all duration-300 shadow-sm hover:shadow-md text-lg hover:scale-105 text-slate-700"
                             >
                                 View more {data.type}
                             </a>
+                        </div>
+
+                        <div className="mt-12 pt-8 border-t border-white/20">
+                            <div className="grid grid-cols-3 gap-4 text-white/80">
+                                <div>
+                                    <p className="text-sm uppercase tracking-wider">Category</p>
+                                    <p className="font-medium text-white">{data.type}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm uppercase tracking-wider">Status</p>
+                                    <p className="font-medium text-white">Active</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm uppercase tracking-wider">ID</p>
+                                    <p className="font-medium text-white">{data.id}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}
             </div>
         </div>
     );
-} 
+}

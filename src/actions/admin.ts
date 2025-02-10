@@ -210,7 +210,7 @@ export const admin = {
             postId: z.string()
         }),
         handler: async (input, context) => {
-            authMiddleware(context)
+            await authMiddleware(context)
 
             const [prio] = await db.select().from(priority).where(eq(priority.postId, input.postId))
 
@@ -248,7 +248,7 @@ export const admin = {
             image: z.string().regex(/^https?:\/\/.+/).optional(),
         }),
         handler: async (input, context) => {
-            authMiddleware(context)
+            await authMiddleware(context)
 
             const [post] = await db.update(posts).set({
                 title: input.title,
@@ -275,7 +275,7 @@ export const admin = {
             mode: z.enum(['add', 'remove', 'arrange'])
         }),
         handler: async (input, context) => {
-            authMiddleware(context)
+            await authMiddleware(context)
 
             if (input.mode === 'add') {
 
@@ -363,7 +363,7 @@ export const admin = {
             approved: z.boolean()
         }),
         handler: async (input, context) => {
-            authMiddleware(context)
+            await authMiddleware(context)
 
             const userDetails = await db.update(user).set({
                 approved: input.approved
@@ -389,13 +389,18 @@ export const admin = {
             message: z.string(),
             type: z.enum(['urgent', 'normal', 'form']),
             status: z.enum(['submitted', 'reviewed', 'approved', 'rejected']),
-            formType: z.enum(['residence', 'indigency', 'clearance']).optional(),
+            formType: z.enum(['residence', 'indigency', 'clearance']).nullable(),
             closedChat: z.boolean().default(true)
-        }).refine((e) => e.type === 'form' && e.formType !== undefined, {
+        }).refine((e) => {
+            if (e.type === 'form') {
+                return e.formType !== null;
+            }
+            return true;
+        }, {
             message: 'Please select a form type'
         }),
         handler: async (input, context) => {
-            authMiddleware(context)
+            await authMiddleware(context)
 
             const reqUpdate = await db.transaction(async (tx) => {
 
@@ -448,7 +453,7 @@ export const admin = {
             link: z.string().regex(/^https?:\/\/.+/).optional()
         }),
         handler: async (input, context) => {
-            authMiddleware(context)
+            await authMiddleware(context)
 
             const [highl] = await db.insert(highlights).values({
                 image: input.image,
@@ -479,7 +484,7 @@ export const admin = {
             caption: z.string()
         }),
         handler: async (input, context) => {
-            authMiddleware(context)
+            await authMiddleware(context)
 
             const downloadableResource = await db.transaction(async (tx) => {
 
@@ -604,7 +609,32 @@ export const admin = {
                 highlightId: highl.id
             }
         }
-    })
+    }),
+    reopenForm: defineAction({
+        accept: 'json',
+        input: z.object({
+            requestFormId: z.string()
+        }),
+        handler: async (input, context) => {
+            await authMiddleware(context)
+
+            const [request] = await db.update(requestUpdateForm).set({
+                form: null
+            }).where(eq(requestUpdateForm.id, input.requestFormId)).returning()
+
+            if (!request) {
+                throw new ActionError({
+                    code: 'NOT_FOUND',
+                    message: 'Request not found'
+                })
+            }
+
+            return {
+                success: true,
+                requestId: request.id
+            }
+        }
+    }),
 }
 
 

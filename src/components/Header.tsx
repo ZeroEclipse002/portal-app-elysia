@@ -56,11 +56,26 @@ export const MainHeader = ({ role, pathname, approved, hasSession }: { role: str
                                     </NavigationMenuItem>
                                 )}
                                 <NavigationMenuItem>
-                                    <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                                        <a href="/news">
-                                            News
-                                        </a>
-                                    </NavigationMenuLink>
+                                    <NavigationMenuTrigger>Feed</NavigationMenuTrigger>
+                                    <NavigationMenuContent className="flex flex-col gap-2 p-2">
+                                        <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+                                            <ListItem
+                                                key={'/news'}
+
+                                                title={'News'}
+                                                href={'/news'}
+                                            >
+                                                View all recent and old news here
+                                            </ListItem>
+                                            <ListItem
+                                                key={'/announcements'}
+                                                title={'Announcements'}
+                                                href={'/announcements'}
+                                            >
+                                                View all announcements here
+                                            </ListItem>
+                                        </ul>
+                                    </NavigationMenuContent>
                                 </NavigationMenuItem>
                                 {role === 'admin' && (
                                     <NavigationMenuItem>

@@ -5,6 +5,7 @@ export interface Post {
     type: 'news' | string; // Using union type since 'news' seems to be one possible value
     public: boolean;
     createdAt: string;
+    image: string;
     updatedAt: string;
     userId: string;
 }

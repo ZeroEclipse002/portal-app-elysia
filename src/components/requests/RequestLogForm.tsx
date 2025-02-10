@@ -140,7 +140,7 @@ export const RequestLogForm = ({ logFormData, docType, requestLogId, requestId, 
                     required
                 />
             </div>
-            {docType === 'residence' && (<div className="space-y-2">
+            <div className="space-y-2">
                 <Label htmlFor="currentAddress">Current Address</Label>
                 <Input
                     disabled={pending || logFormData.form !== null}
@@ -151,7 +151,7 @@ export const RequestLogForm = ({ logFormData, docType, requestLogId, requestId, 
                     placeholder="Enter your current address"
                     required
                 />
-            </div>)}
+            </div>
             <Button type="submit" className="w-full" disabled={pending || logFormData.form !== null}>
                 Submit
             </Button>

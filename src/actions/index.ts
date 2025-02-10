@@ -337,12 +337,12 @@ export const server = {
                     })
                 }
 
-                if (request.request?.userId !== context.locals.user?.id) {
-                    throw new ActionError({
-                        code: 'BAD_REQUEST',
-                        message: 'You are not authorized to submit this form'
-                    })
-                }
+                // if (request.request?.userId !== context.locals.user?.id) {
+                //     throw new ActionError({
+                //         code: 'BAD_REQUEST',
+                //         message: 'You are not authorized to submit this form'
+                //     })
+                // }
 
                 if (request.form.form !== null) {
                     throw new ActionError({
