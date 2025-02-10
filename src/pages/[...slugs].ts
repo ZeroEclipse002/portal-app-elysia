@@ -10,7 +10,7 @@ const app = new Elysia()
     .use(
         cron({
             name: 'heartbeat',
-            pattern: Patterns.everySecond(),
+            pattern: Patterns.everyMinute(),
             run() {
                 console.log("Heartbeat")
             }
