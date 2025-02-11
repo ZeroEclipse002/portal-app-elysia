@@ -17,7 +17,7 @@ type FormFields = {
     currentAddress: string;
 }
 
-export const RequestLogForm = ({ logFormData, docType, requestLogId, requestId, formLogId }: { logFormData: FormLog, docType: string, requestLogId: string, requestId: string, formLogId: string }) => {
+export const RequestLogForm = ({ logFormData, docType, requestLogId, requestId, formLogId, isAdmin }: { logFormData: FormLog, docType: string, requestLogId: string, requestId: string, formLogId: string, isAdmin: boolean }) => {
     const [formData, setFormData] = useState<FormFields>({
         fullName: logFormData.form?.fullName ?? '',
         birthDate: logFormData.form?.birthDate ?? '',
@@ -83,6 +83,7 @@ export const RequestLogForm = ({ logFormData, docType, requestLogId, requestId, 
             <div className="space-y-2">
                 <Label htmlFor="birthDate">Birth Date</Label>
                 <Input
+                    type="date"
                     disabled={pending || logFormData.form !== null}
                     id="birthDate"
                     name="birthDate"

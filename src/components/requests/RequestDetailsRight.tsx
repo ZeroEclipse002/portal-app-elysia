@@ -191,15 +191,36 @@ export const RequestDetailsRight = ({ requestId, userId, isAdmin }: { requestId:
                                                         {log.form.form !== null ? 'Submitted' : 'Not Submitted'}
                                                     </p>
                                                     {
-                                                        log.form.form !== null && (
-                                                            <Button variant={'ghost'} className="hover:bg-slate-200" onClick={() => handleCloseChat(log.id)}>Reset Form</Button>
+                                                        log.form.form !== null && isAdmin && (
+                                                            <Button variant={'ghost'} className="hover:bg-slate-200" onClick={() => handleResetForm(log.form.id)}>Reset Form</Button>
                                                         )
                                                     }
                                                 </>
                                             )}
                                         </div>
-                                        {log.form && (
-                                            <RequestLogForm formLogId={log.form.id} requestId={request.request.id} requestLogId={log.id} docType={log.form.docType} logFormData={log.form} />
+                                        {log.form && !isAdmin && (
+                                            <RequestLogForm isAdmin={isAdmin} formLogId={log.form.id} requestId={request.request.id} requestLogId={log.id} docType={log.form.docType} logFormData={log.form} />
+                                        )}
+                                        {(log.type === 'form' && log.form.form && isAdmin) && (
+                                            <div className="mt-4 space-y-4">
+                                                {log.form.form && Object.entries(log.form.form).map(([key, value]) => (
+                                                    <div key={key} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                                                        <div className="flex items-center justify-between">
+                                                            <label className="text-sm font-medium text-gray-700 capitalize">
+                                                                {key.replace(/_/g, ' ')}
+                                                            </label>
+                                                            <span className="text-sm text-gray-600">
+                                                                {typeof value === 'boolean'
+                                                                    ? (value ? 'Yes' : 'No')
+                                                                    : Array.isArray(value)
+                                                                        ? value.join(', ')
+                                                                        : value?.toString() || 'N/A'
+                                                                }
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         )}
                                     </div>
                                     <p className="text-sm text-gray-600 leading-relaxed mb-4">

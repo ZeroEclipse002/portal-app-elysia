@@ -59,11 +59,10 @@ export function HeroSectionContent({ recent, priority, initialData }: HeroSectio
                     <div className="backdrop-blur-md bg-white/80 rounded-full p-1.5 flex gap-3 shadow-sm border border-slate-100">
                         <button
                             onClick={() => handleStateChange("recent")}
-                            className={`px-4 py-2 rounded-full transition-all duration-300 ${
-                                state === "recent"
-                                    ? "bg-slate-900 text-white shadow-md"
-                                    : "text-slate-700 hover:bg-slate-100"
-                            }`}
+                            className={`px-4 py-2 rounded-full transition-all duration-300 ${state === "recent"
+                                ? "bg-slate-900 text-white shadow-md"
+                                : "text-slate-700 hover:bg-slate-100"
+                                }`}
                         >
                             Recent {recent.length > 0 && <span className="ml-1 text-sm opacity-75">({recent.length})</span>}
                         </button>
@@ -160,7 +159,7 @@ export function HeroSectionContent({ recent, priority, initialData }: HeroSectio
                                 <span className="inline-block transition-transform group-hover:translate-x-1 ml-2">→</span>
                             </a>
                             <a
-                                href={data.id || "#"}
+                                href={data.type === "announcement" ? "announcements" : "news"}
                                 className="px-8 py-4 bg-white/50 backdrop-blur-sm border border-slate-200 rounded-full hover:bg-white transition-all duration-300 shadow-sm hover:shadow-md text-lg hover:scale-105 text-slate-700"
                             >
                                 View more {data.type}
