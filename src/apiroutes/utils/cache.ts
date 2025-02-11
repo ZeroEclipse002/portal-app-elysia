@@ -20,6 +20,12 @@ export class MemoryCache {
         }
     }
 
+    async destroyAll() {
+        for (const [key, item] of this.cache.entries()) {
+            this.cache.delete(key);
+        }
+    }
+
     async get(key: string) {
         const item = this.cache.get(key);
         if (!item) return null;

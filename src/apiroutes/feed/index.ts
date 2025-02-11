@@ -3,6 +3,9 @@ import { cache } from '../utils/cache';
 import { getConfig, getRecentPosts, getPriorityPosts, getPostContent, GetAllNews, GetAllAnnouncements } from '@/db/queries';
 import type { TTLType } from '../types';
 import { userMiddleware } from '../auth';
+import { db } from '@/db';
+import { posts } from '@/db/schema';
+import { and, eq } from 'drizzle-orm';
 
 const isBusinessHours = () => {
     const now = new Date();
@@ -57,32 +60,41 @@ export const feedRoutes = new Elysia()
                 priority: priorityPosts ?? {}
             };
         })
-        .get('/feed/news', async () => {
+        .get('/feed/news', async ({ query }) => {
 
-            const data = await cache.get('news');
+            const page = query.page || '1';
+
+            const totalPages = await db.$count(posts, and(eq(posts.type, 'news'), eq(posts.public, true)));
+            const data = await cache.get('news:' + page);
 
             if (data) {
-                return data;
+                return { data, totalPages: Math.ceil(totalPages / 9) };
             } else {
-                const data = await GetAllNews.execute();
-                await cache.set('news', data, { ex: getTTL('recent') });
-                return data;
+                const data = await GetAllNews.execute({
+                    page: ((parseInt(page as string) || 1) - 1) * 9,
+                });
+                await cache.set('news:' + page, data, { ex: getTTL('recent') });
+                return { data, totalPages: Math.ceil(totalPages / 9) };
             }
         })
-        .get('/feed/announcements', async () => {
+        .get('/feed/announcements', async ({ query }) => {
 
-            const data = await cache.get('announcements');
+            const page = query.page || '1';
+
+            const totalPages = await db.$count(posts, and(eq(posts.type, 'announcement'), eq(posts.public, true)));
+            const data = await cache.get('announcements:' + page);
 
             if (data) {
-
-                return data;
+                return { data, totalPages: Math.ceil(totalPages / 9) };
 
             } else {
-                const data = await GetAllAnnouncements.execute();
+                const data = await GetAllAnnouncements.execute({
+                    page: ((parseInt(page as string) || 1) - 1) * 9,
+                });
 
-                await cache.set('announcements', data, { ex: getTTL('recent') });
+                await cache.set('announcements:' + page, data, { ex: getTTL('recent') });
 
-                return data;
+                return { data, totalPages: Math.ceil(totalPages / 9) };
             }
 
         })
@@ -102,11 +114,16 @@ export const feedRoutes = new Elysia()
                 throw new Error('Unauthorized');
             }
 
+            if (user.role !== 'admin') {
+                throw new Error('Unauthorized');
+            }
+
             await Promise.all([
                 cache.del('recent'),
                 cache.del('priority'),
                 cache.del('config'),
-                cache.del('request')
+                cache.del('request'),
+                cache.destroyAll()
             ]);
 
             return { success: true, message: 'Cache invalidated successfully' };

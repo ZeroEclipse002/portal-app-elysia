@@ -1,9 +1,12 @@
 import { fetchClient, fetcher } from "@/lib/utils";
+import { useState } from "react";
 import useSWR from "swr"
+import { PaginatorComp } from "./PaginatorComp";
 
 
 export const AnnouncementFeed = () => {
-    const { data, error, isLoading, isValidating } = useSWR('/api/feed/announcements', fetcher)
+    const [page, setPage] = useState(1);
+    const { data, error, isLoading, isValidating } = useSWR('/api/feed/announcements?page=' + page, fetcher)
 
     if (isLoading) {
         return (
@@ -29,8 +32,8 @@ export const AnnouncementFeed = () => {
         <div className="w-full bg-slate-50 p-6 min-h-screen">
             <div className="container mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {data?.map((announcement: any) => (
-                        <div key={announcement.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md hover:border-blue-100">
+                    {data.data?.map((announcement: any) => (
+                        <a href={`/post/${announcement.id}`} key={announcement.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md hover:border-blue-100">
                             <div className="aspect-video relative overflow-hidden">
                                 <img
                                     src={announcement.image}
@@ -45,7 +48,7 @@ export const AnnouncementFeed = () => {
                                     {new Date(announcement.createdAt).toLocaleDateString()}
                                 </time>
                             </div>
-                        </div>
+                        </a>
                     ))}
                 </div>
                 {isValidating && (
@@ -57,6 +60,7 @@ export const AnnouncementFeed = () => {
                     </div>
                 )}
             </div>
+            <PaginatorComp page={page} setPage={setPage} totalPages={data.totalPages ?? 0} />
         </div>
     )
 }

@@ -114,13 +114,17 @@ export const getHighlights = db.query.highlights.findMany().prepare('getHighligh
 export const getDownloadableResources = db.query.downloadableContent.findMany().prepare('getDownloadableResources')
 
 export const GetAllNews = db.query.posts.findMany({
-    where: (table, { eq }) => eq(table.public, true),
+    where: (table, { eq, and }) => and(eq(table.public, true), eq(table.type, 'news')),
     orderBy: (table, { desc }) => [desc(table.createdAt)],
+    limit: 9,
+    offset: sql.placeholder('page'),
 }).prepare('getAllNews')
 
 export const GetAllAnnouncements = db.query.posts.findMany({
-    where: (table, { eq }) => eq(table.type, 'announcement'),
+    where: (table, { eq, and }) => and(eq(table.public, true), eq(table.type, 'announcement')),
     orderBy: (table, { desc }) => [desc(table.createdAt)],
+    limit: 9,
+    offset: sql.placeholder('page'),
 }).prepare('getAllAnnouncements')
 
 
