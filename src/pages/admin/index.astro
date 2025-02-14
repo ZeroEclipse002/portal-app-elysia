@@ -10,6 +10,7 @@ import { HighlightsTable } from "@/components/HighlightsTable";
 import { DownloadableTable } from "@/components/DownloadableTable";
 import { getPosts } from "@/db/queries";
 import PostsTableNest from "@/components/PostsTableNest.astro";
+import UserStatistics from "@/components/UserStatistics.astro";
 
 if (Astro.locals.user?.role !== "admin") {
   return Astro.redirect("/");
@@ -22,6 +23,22 @@ if (Astro.locals.user?.role !== "admin") {
       <h1 class="text-3xl font-bold text-slate-900 mb-8">Admin Dashboard</h1>
 
       <section class="grid gap-6 lg:grid-cols-2">
+        <UserStatistics server:defer>
+          <div slot="fallback">
+            <div class="flex items-center justify-center py-12">
+              <div class="relative">
+                <div
+                  class="w-8 h-8 border-2 border-slate-200 rounded-full animate-ping absolute"
+                >
+                </div>
+                <div
+                  class="w-8 h-8 border-2 border-slate-800 rounded-full border-t-transparent animate-spin"
+                >
+                </div>
+              </div>
+            </div>
+          </div>
+        </UserStatistics>
         <div
           class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 transition-all duration-200 hover:shadow-md overflow-hidden"
         >

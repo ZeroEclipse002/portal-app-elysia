@@ -3,6 +3,26 @@
 @tailwind utilities;
 @layer base {
   :root {
+    /* Relationship colors */
+    --color-spouse: #4299e1;
+    --color-child: #48bb78;
+    --color-parent: #ed8936;
+    --color-sibling: #9f7aea;
+    --color-other: #667eea;
+
+    /* Gender colors */
+    --color-male: #4299e1;
+    --color-female: #ed64a6;
+    --color-other: #9f7aea;
+
+    /* Age bracket colors */
+    --color-age-0-17: #4299e1;
+    --color-age-18-30: #48bb78;
+    --color-age-31-50: #ed8936;
+    --color-age-51-70: #9f7aea;
+    --color-age-70plus: #667eea;
+  }
+  :root {
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
@@ -27,7 +47,7 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem
+    --radius: 0.5rem;
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -53,10 +73,30 @@
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%
+    --chart-5: 340 75% 55%;
   }
 }
 @layer base {
+  :root {
+    /* Relationship colors */
+    --color-spouse: #4299e1;
+    --color-child: #48bb78;
+    --color-parent: #ed8936;
+    --color-sibling: #9f7aea;
+    --color-other: #667eea;
+
+    /* Gender colors */
+    --color-male: #4299e1;
+    --color-female: #ed64a6;
+    --color-other: #9f7aea;
+
+    /* Age bracket colors */
+    --color-age-0-17: #4299e1;
+    --color-age-18-30: #48bb78;
+    --color-age-31-50: #ed8936;
+    --color-age-51-70: #9f7aea;
+    --color-age-70plus: #667eea;
+  }
   * {
     @apply border-border;
   }

@@ -145,7 +145,7 @@ export const UsersTable = () => {
             }}>Clear</button></div>}
             <UsersTableNest users={users} isLoading={isLoading} error={error} />
             <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
-                <div>
+                <div className="flex items-center gap-2">
                     {page > 1 && (
                         <button
                             onClick={() => setPage(page - 1)}
@@ -157,20 +157,18 @@ export const UsersTable = () => {
                             Previous
                         </button>
                     )}
+                    {users?.length === 5 && (
+                        <button
+                            onClick={() => setPage(page + 1)}
+                            className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                        >
+                            Next
+                            <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    )}
                 </div>
-            </div>
-            <div>
-                {users?.length === 5 && (
-                    <button
-                        onClick={() => setPage(page + 1)}
-                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                    >
-                        Next
-                        <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                )}
             </div>
         </div>
     )
