@@ -18,9 +18,9 @@ if (Astro.locals.user?.role !== "admin") {
 ---
 
 <Layout>
-  <main class="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+  <main class="min-h-screen bg-gradient-to-b from-red-50 to-white">
     <div class="container mx-auto px-4 py-8 space-y-8">
-      <h1 class="text-3xl font-bold text-slate-900 mb-8">Admin Dashboard</h1>
+      <h1 class="text-3xl font-bold text-red-900 mb-8">Admin Dashboard</h1>
 
       <section class="grid gap-6 lg:grid-cols-2">
         <UserStatistics server:defer>
@@ -28,11 +28,11 @@ if (Astro.locals.user?.role !== "admin") {
             <div class="flex items-center justify-center py-12">
               <div class="relative">
                 <div
-                  class="w-8 h-8 border-2 border-slate-200 rounded-full animate-ping absolute"
+                  class="w-8 h-8 border-2 border-red-200 rounded-full animate-ping absolute"
                 >
                 </div>
                 <div
-                  class="w-8 h-8 border-2 border-slate-800 rounded-full border-t-transparent animate-spin"
+                  class="w-8 h-8 border-2 border-red-800 rounded-full border-t-transparent animate-spin"
                 >
                 </div>
               </div>

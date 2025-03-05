@@ -13,25 +13,23 @@ const { data: configData } = await fetchClient.api.config.get();
 const defaultOrder = [1, 2, 3, 4];
 
 const componentMap = {
-    1: MarqueeNest,
-    2: HeroSection,
-    3: Carousel,
-    4: List,
+  1: MarqueeNest,
+  2: HeroSection,
+  3: Carousel,
+  4: List,
 };
 ---
 
-<div class="w-full h-fit">
-    {
-        configData
-            ? configData.sequence.map((index: number) => {
-                  const Component =
-                      componentMap[index as keyof typeof componentMap];
-                  return Component && <Component />;
-              })
-            : defaultOrder.map((index) => {
-                  const Component =
-                      componentMap[index as keyof typeof componentMap];
-                  return Component && <Component />;
-              })
-    }
+<div class="w-full h-fit bg-gradient-to-b from-red-50 via-white to-red-100">
+  {
+    configData
+      ? configData.sequence.map((index: number) => {
+          const Component = componentMap[index as keyof typeof componentMap];
+          return Component && <Component />;
+        })
+      : defaultOrder.map((index) => {
+          const Component = componentMap[index as keyof typeof componentMap];
+          return Component && <Component />;
+        })
+  }
 </div>

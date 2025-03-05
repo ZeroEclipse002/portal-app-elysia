@@ -15,7 +15,7 @@ export const MainHeader = ({ role, pathname, approved, hasSession }: { role: str
                 <div className="relative flex flex-col md:flex-row">
                     {/* Logo */}
                     <a href="/" className="flex items-center mb-5 font-medium text-gray-900 md:mb-0">
-                        <span className="text-xl font-black leading-none text-gray-900 select-none">
+                        <span className="text-xl font-black leading-none text-red-700 select-none">
                             Marawoy<span className="text-indigo-600">.</span>
                         </span>
                     </a>

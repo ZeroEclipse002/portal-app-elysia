@@ -56,22 +56,24 @@ export function HeroSectionContent({ recent, priority, initialData }: HeroSectio
                     </div>
                 )}
                 <div className="absolute top-8 left-8 md:top-10 md:left-10">
-                    <div className="backdrop-blur-md bg-white/80 rounded-full p-1.5 flex gap-3 shadow-sm border border-slate-100">
+                    <div className="backdrop-blur-md bg-white/80 rounded-full p-1.5 flex gap-3 shadow-sm border border-red-100">
                         <button
                             onClick={() => handleStateChange("recent")}
-                            className={`px-4 py-2 rounded-full transition-all duration-300 ${state === "recent"
-                                ? "bg-slate-900 text-white shadow-md"
-                                : "text-slate-700 hover:bg-slate-100"
-                                }`}
+                            className={`px-4 py-2 rounded-full transition-all duration-300 ${
+                                state === "recent"
+                                    ? "bg-red-700 text-white shadow-md"
+                                    : "text-red-700 hover:bg-red-50"
+                            }`}
                         >
                             Recent {recent.length > 0 && <span className="ml-1 text-sm opacity-75">({recent.length})</span>}
                         </button>
                         <button
                             onClick={() => handleStateChange("main")}
-                            className={`px-4 py-2 rounded-full transition-all duration-300 ${state === "main"
-                                ? "bg-slate-900 text-white shadow-md"
-                                : "text-slate-600 hover:bg-slate-100"
-                                }`}
+                            className={`px-4 py-2 rounded-full transition-all duration-300 ${
+                                state === "main"
+                                    ? "bg-red-700 text-white shadow-md"
+                                    : "text-red-700 hover:bg-red-50"
+                            }`}
                         >
                             Main {priority.length > 0 && <span className="ml-1 text-sm opacity-75">({priority.length})</span>}
                         </button>
@@ -84,7 +86,7 @@ export function HeroSectionContent({ recent, priority, initialData }: HeroSectio
                             onClick={handlePrev}
                             disabled={currentIndex === 0}
                             className={cn(
-                                "p-2 rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-white transition-all",
+                                "p-2 rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-red-50 text-red-700 transition-all",
                                 currentIndex === 0 && "opacity-50 cursor-not-allowed"
                             )}
                         >
@@ -94,7 +96,7 @@ export function HeroSectionContent({ recent, priority, initialData }: HeroSectio
                             onClick={handleNext}
                             disabled={currentIndex === currentArray.length - 1}
                             className={cn(
-                                "p-2 rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-white transition-all",
+                                "p-2 rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-red-50 text-red-700 transition-all",
                                 currentIndex === currentArray.length - 1 && "opacity-50 cursor-not-allowed"
                             )}
                         >
@@ -119,7 +121,7 @@ export function HeroSectionContent({ recent, priority, initialData }: HeroSectio
                         </Badge>
                         <button
                             onClick={() => handleStateChange(state === "recent" ? "main" : "recent")}
-                            className="px-8 py-4 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-full hover:from-slate-800 hover:to-slate-700 transition-all duration-300 shadow-lg hover:shadow-xl text-lg hover:scale-105"
+                            className="px-8 py-4 bg-gradient-to-br from-red-700 to-red-800 text-white rounded-full hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl text-lg hover:scale-105"
                         >
                             View {state === "recent" ? "Main" : "Recent"} Content
                         </button>
@@ -127,7 +129,7 @@ export function HeroSectionContent({ recent, priority, initialData }: HeroSectio
                 ) : (
                     <div className="space-y-8 text-center max-w-4xl mx-auto">
                         <div className="mb-4">
-                            <Badge variant="secondary" className="mb-2 bg-white/20 text-white">
+                            <Badge variant="secondary" className="mb-2 bg-red-700/20 text-white">
                                 {currentIndex + 1} of {currentArray.length}
                             </Badge>
                         </div>
@@ -153,20 +155,20 @@ export function HeroSectionContent({ recent, priority, initialData }: HeroSectio
                         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center mt-8">
                             <a
                                 href={data.id ? `/post/${data.id}` : "#"}
-                                className="group px-8 py-4 bg-slate-800 text-white rounded-full transition-all duration-300 shadow-lg hover:shadow-xl text-lg hover:scale-105 hover:bg-slate-700"
+                                className="group px-8 py-4 bg-red-700 text-white rounded-full transition-all duration-300 shadow-lg hover:shadow-xl text-lg hover:scale-105 hover:bg-red-600"
                             >
                                 Visit {data.type}
                                 <span className="inline-block transition-transform group-hover:translate-x-1 ml-2">→</span>
                             </a>
                             <a
                                 href={data.type === "announcement" ? "announcements" : "news"}
-                                className="px-8 py-4 bg-white/50 backdrop-blur-sm border border-slate-200 rounded-full hover:bg-white transition-all duration-300 shadow-sm hover:shadow-md text-lg hover:scale-105 text-slate-700"
+                                className="px-8 py-4 bg-white/50 backdrop-blur-sm border border-red-100 rounded-full hover:bg-white transition-all duration-300 shadow-sm hover:shadow-md text-lg hover:scale-105 text-red-700"
                             >
                                 View more {data.type}
                             </a>
                         </div>
 
-                        <div className="mt-12 pt-8 border-t border-white/20">
+                        <div className="mt-12 pt-8 border-t border-red-100/20">
                             <div className="grid grid-cols-3 gap-4 text-white/80">
                                 <div>
                                     <p className="text-sm uppercase tracking-wider">Category</p>

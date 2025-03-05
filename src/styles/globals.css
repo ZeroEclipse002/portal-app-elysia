@@ -16,11 +16,11 @@
     --color-other: #9f7aea;
 
     /* Age bracket colors */
-    --color-age-0-17: #4299e1;
-    --color-age-18-30: #48bb78;
-    --color-age-31-50: #ed8936;
-    --color-age-51-70: #9f7aea;
-    --color-age-70plus: #667eea;
+    --color-age-child: hsl(210, 100%, 60%); /* Blue */
+    --color-age-youth: hsl(40, 100%, 60%); /* Yellow/Gold */
+    --color-age-adult: hsl(160, 60%, 40%); /* Green */
+    --color-age-senior: hsl(280, 50%, 60%); /* Purple */
+    --color-age-default: hsl(200, 20%, 50%);
   }
   :root {
     --background: 0 0% 100%;

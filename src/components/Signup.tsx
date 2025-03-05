@@ -1,30 +1,39 @@
 import { authClient } from "@/lib/auth-client";
-import { useState } from 'react';
+import { SITE_KEY } from "astro:env/client";
+import { useRef, useState } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function SignUp() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [image, setImage] = useState<File | null>(null);
-  const [error, setError] = useState("")
+  const [error, setError] = useState("");
+  const recaptcha = useRef<ReCAPTCHA>(null);
 
   const signUp = async () => {
     console.log("signUp", email, password, name);
-    const { data, error } = await authClient.signUp.email({
-      email,
-      password,
-      name
-    }, {
-      onRequest: (ctx) => {
-        //show loading
+    const { data, error } = await authClient.signUp.email(
+      {
+        email,
+        password,
+        name,
       },
-      onSuccess: (ctx) => {
-        //redirect to the dashboard
-      },
-      onError: (ctx) => {
-        setError(ctx.error.message || "An error occurred")
-      },
-    });
+      {
+        onRequest: () => {
+          if (!recaptcha.current.getValue()) {
+            setError("Recaptcha verification failed");
+            throw new Error("Recaptcha verification failed");
+          }
+        },
+        onSuccess: (ctx) => {
+          //redirect to the dashboard
+        },
+        onError: (ctx) => {
+          setError(ctx.error.message || "An error occurred");
+        },
+      }
+    );
   };
 
   return (
@@ -51,6 +60,7 @@ export default function SignUp() {
         onChange={(e) => setPassword(e.target.value)}
         className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
+      <ReCAPTCHA sitekey={SITE_KEY} ref={recaptcha} />
       {error && <p className="text-red-500">{error}</p>}
       <button
         onClick={signUp}
