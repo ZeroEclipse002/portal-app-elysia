@@ -60,7 +60,7 @@ export default function SignUp() {
         onChange={(e) => setPassword(e.target.value)}
         className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
-      <ReCAPTCHA sitekey={SITE_KEY} ref={recaptcha} />
+      <ReCAPTCHA sitekey={SITE_KEY} className="z-[999]" ref={recaptcha} />
       {error && <p className="text-red-500">{error}</p>}
       <button
         onClick={signUp}
