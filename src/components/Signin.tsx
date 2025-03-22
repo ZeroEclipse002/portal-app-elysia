@@ -7,7 +7,7 @@ export const Signin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const recaptcha = useRef(null);
+  const recaptcha = useRef<ReCAPTCHA>(null);
 
   const handleSignin = async () => {
     const { data, error } = await authClient.signIn.email(
@@ -17,6 +17,7 @@ export const Signin = () => {
       },
       {
         onRequest: () => {
+          // @ts-ignore
           if (!recaptcha.current.getValue()) {
             setError("Recaptcha verification failed");
             throw new Error("Recaptcha verification failed");
