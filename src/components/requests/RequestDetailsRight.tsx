@@ -20,6 +20,18 @@ interface RequestLogWithForm extends TicketUpdate {
     form: FormLog
 }
 
+interface FormDataDoc {
+    fullName: string;
+    age: number;
+    birthDate: string;
+    birthPlace: string;
+    currentAddress: string;
+    completeAddress: string;
+    purpose: string;
+    currentDate: string;
+    yearsOfResidence?: string; // New field for residence certificate
+}
+
 export const RequestDetailsRight = ({ requestId, userId, isAdmin }: { requestId: string, userId: string, isAdmin: boolean }) => {
     const [openAccordion, setOpenAccordion] = useState<string | undefined>(undefined)
 
@@ -104,7 +116,17 @@ export const RequestDetailsRight = ({ requestId, userId, isAdmin }: { requestId:
 
     return (
         <div className="flex-1 border rounded-xl p-6 relative overflow-hidden">
-            {isAdmin && (<Drawer requestLogsForm={requestLogsForm} />)}
+            {isAdmin && (<Drawer requestLogsForm={requestLogsForm} docUserDetails={{
+                fullName: request.request.docUserDetails?.fullName ?? '',
+                age: request.request.docUserDetails?.birthDate ? Math.floor((new Date().getTime() - new Date(request.request.docUserDetails.birthDate).getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : 0,
+                birthDate: request.request.docUserDetails?.birthDate ?? '',
+                birthPlace: request.request.docUserDetails?.birthPlace ?? '',
+                currentAddress: request.request.docUserDetails?.currentAddress ?? '',
+                completeAddress: request.request.docUserDetails?.completeAddress ?? '',
+                purpose: request.request.docUserDetails?.purpose ?? '',
+                currentDate: new Date().toISOString().split('T')[0],
+                yearsOfResidence: request.request.docUserDetails?.yearsOfResidence ?? '',
+            }} />)}
             <h2 className="text-2xl font-bold text-gray-900 mb-8">
                 Request Timelines
             </h2>
@@ -303,7 +325,9 @@ export const RequestDetailsRight = ({ requestId, userId, isAdmin }: { requestId:
 }
 
 
-const Drawer = ({ requestLogsForm }: { requestLogsForm: FormLog[] }) => {
+
+
+const Drawer = ({ requestLogsForm, docUserDetails }: { requestLogsForm: FormLog[], docUserDetails?: FormDataDoc }) => {
 
     const [open, setOpen] = useState(false)
 
@@ -317,7 +341,7 @@ const Drawer = ({ requestLogsForm }: { requestLogsForm: FormLog[] }) => {
                     <DrawerTitle>Generate Document</DrawerTitle>
                     <DrawerDescription>Please fill up the form below to generate a document.</DrawerDescription>
                 </DrawerHeader>
-                <DocxFiller requestLogsForm={requestLogsForm} />
+                <DocxFiller requestLogsForm={requestLogsForm} docUserDetails={docUserDetails} />
                 <DrawerFooter>
                     <DrawerClose asChild>
                         <Button variant="outline">Close</Button>

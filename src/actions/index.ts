@@ -69,11 +69,14 @@ export const server = {
                 phone: z.string().regex(/^\d{11}$/, {
                     message: 'Phone number must be 11 digits'
                 }),
-                address: z.string(),
                 birthDate: z.string().date().refine(date => new Date(date) < new Date(), {
                     message: 'Birth date must be in the past'
                 }),
-                gender: z.string()
+                gender: z.string(),
+                birthPlace: z.string(),
+                yearsOfResidence: z.string(),
+                completeAddress: z.string(),
+                currentAddress: z.string(),
             }),
             familyMembers: z.array(z.object({
                 fullName: z.string(),
@@ -81,7 +84,15 @@ export const server = {
                     message: 'Birth date must be in the past'
                 }),
                 gender: z.string(),
-                relationship: z.string()
+                relationship: z.string(),
+                email: z.string().email().optional(),
+                phone: z.string().regex(/^\d{11}$/, {
+                    message: 'Phone number must be 11 digits'
+                }).optional(),
+                birthPlace: z.string(),
+                yearsOfResidence: z.string(),
+                completeAddress: z.string(),
+                currentAddress: z.string(),
             })).min(1, {
                 message: 'Please add at least one family member'
             })
@@ -101,12 +112,17 @@ export const server = {
                     updatedAt: new Date(),
                 })
 
-                await tx.insert(familyData).values({
-                    data: input.familyMembers,
+                const familyDataRes = await tx.insert(familyData).values({
+                    data: input.familyMembers.map((member, index) => ({
+                        ...member,
+                        id: index
+                    })),
                     userId: context.locals.user?.id,
                     createdAt: new Date(),
                     updatedAt: new Date(),
-                })
+                }).returning()
+
+                console.log(familyDataRes)
             })
 
             return {
@@ -123,6 +139,8 @@ export const server = {
             idPicture: z.instanceof(File).refine(file => file.type.startsWith('image/') && file.size <= 1 * 1024 * 1024, {
                 message: 'Please upload a valid image file (max 1MB)'
             }),
+            familyMemberId: z.string().optional(),
+            purpose: z.string().optional()
         }).refine(data => data.requestType === 'other' ? !!data.otherRequestType : true, {
             message: 'Please specify the type of request',
             path: ['otherRequestType']
@@ -173,6 +191,73 @@ export const server = {
                         })
                     }
 
+                    let docUserDetails: {
+                        fullName: string;
+                        birthDate: string;
+                        birthPlace: string;
+                        currentAddress: string;
+                        yearsOfResidence: string;
+                        completeAddress: string;
+                        purpose: string;
+                    } | null = null
+
+
+                    if (input.requestType === 'document' && input.familyMemberId && input.purpose) {
+                        if (input.familyMemberId !== 'selfdoc') {
+                            const familyMember = await tx.query.familyData.findFirst({
+                                where: (table, { eq }) => eq(table.userId, context.locals.user?.id as string)
+                            })
+
+                            if (!familyMember) {
+                                throw new ActionError({
+                                    code: 'BAD_REQUEST',
+                                    message: 'Family member not found'
+                                })
+                            }
+
+                            if (!familyMember.data.find(member => member.id === Number(input.familyMemberId))) {
+                                throw new ActionError({
+                                    code: 'BAD_REQUEST',
+                                    message: 'You are not authorized to submit this request'
+                                })
+                            }
+
+                            const familyMemberData = familyMember.data.find(member => member.id === Number(input.familyMemberId))
+
+                            docUserDetails = {
+                                fullName: familyMemberData?.fullName ?? '',
+                                birthDate: familyMemberData?.birthDate ?? '',
+                                birthPlace: familyMemberData?.birthPlace ?? '',
+                                currentAddress: familyMemberData?.currentAddress ?? '',
+                                yearsOfResidence: familyMemberData?.yearsOfResidence ?? '',
+                                completeAddress: familyMemberData?.completeAddress ?? '',
+                                purpose: input.purpose ?? '',
+                            }
+
+                        } else {
+                            const userDetails = await tx.query.userDetails.findFirst({
+                                where: (table, { eq }) => eq(table.userId, context.locals.user?.id as string)
+                            })
+
+                            if (!userDetails) {
+                                throw new ActionError({
+                                    code: 'BAD_REQUEST',
+                                    message: 'User details not found'
+                                })
+                            }
+
+                            docUserDetails = {
+                                fullName: userDetails.firstName + ' ' + userDetails.lastName,
+                                birthDate: userDetails.birthDate ?? '',
+                                birthPlace: userDetails.birthPlace ?? '',
+                                currentAddress: userDetails.currentAddress ?? '',
+                                yearsOfResidence: userDetails.yearsOfResidence ?? '',
+                                completeAddress: userDetails.completeAddress ?? '',
+                                purpose: input.purpose ?? '',
+                            }
+
+                        }
+                    }
                     const request = await tx.insert(requests).values({
                         type: input.requestType,
                         details: input.requestDetails ?? '',
@@ -180,6 +265,7 @@ export const server = {
                         idPicture: idPic.data.key,
                         userId: context.locals.user?.id,
                         createdAt: new Date(),
+                        docUserDetails: docUserDetails,
                     })
 
                     return {
@@ -307,7 +393,7 @@ export const server = {
                 }),
                 completeAddress: z.string(),
                 purpose: z.string(),
-                yearsOfResidence: z.string().optional(),
+                yearsOfResidence: z.number().optional(),
                 birthPlace: z.string(),
                 currentAddress: z.string(),
             })
@@ -370,6 +456,143 @@ export const server = {
             } catch (error) {
                 console.error('Error submitting form:', error)
                 throw error
+            }
+        }
+    }),
+    addFamilyMember: defineAction({
+        accept: 'form',
+        input: z.object({
+            fullName: z.string(),
+            birthDate: z.coerce.date().refine(date => new Date(date) < new Date(), {
+                message: 'Birth date must be in the past'
+            }),
+            gender: z.string(),
+            relationship: z.string(),
+            email: z.string().email().optional(),
+            phone: z.string().regex(/^\d{11}$/, {
+                message: 'Phone number must be 11 digits'
+            }).optional(),
+            birthPlace: z.string(),
+            yearsOfResidence: z.string(),
+            completeAddress: z.string(),
+            currentAddress: z.string(),
+        }),
+        handler: async (input, context) => {
+            console.log("input", input)
+            try {
+                await ApprovedMiddleware(context)
+
+                const familyDataRes = await db.query.familyData.findFirst({
+                    where: (table, { eq }) => eq(table.userId, context.locals.user?.id!)
+                })
+
+                if (!familyDataRes) {
+                    throw new ActionError({
+                        code: 'BAD_REQUEST',
+                        message: 'Family data not found'
+                    })
+                }
+
+                const familyMember = {
+                    ...input,
+                    birthDate: input.birthDate.toISOString().split('T')[0],
+                    id: familyDataRes.data.length + 1
+                }
+
+                const [familyMemberRes] = await db.update(familyData).set({
+                    data: [...familyDataRes.data, familyMember],
+                    userId: context.locals.user?.id,
+                    updatedAt: new Date(),
+                }).where(eq(familyData.userId, context.locals.user?.id!)).returning()
+
+                return {
+                    success: true,
+                    message: 'Family member added successfully',
+                    familyMemberRes
+                }
+            } catch (error) {
+                console.error('Error adding family member:', error)
+                throw new ActionError({
+                    code: 'INTERNAL_SERVER_ERROR',
+                    message: 'Failed to add family member',
+                })
+            }
+        }
+    }),
+    deleteFamilyMember: defineAction({
+        accept: 'form',
+        input: z.object({
+            id: z.string()
+        }),
+        handler: async (input, context) => {
+            try {
+                await ApprovedMiddleware(context)
+
+                const familyDataRes = await db.query.familyData.findFirst({
+                    where: (table, { eq }) => eq(table.userId, context.locals.user?.id!)
+                })
+
+                if (!familyDataRes) {
+                    throw new ActionError({
+                        code: 'BAD_REQUEST',
+                        message: 'Family data not found'
+                    })
+                }
+
+                const [familyMemberRes] = await db.update(familyData).set({
+                    data: familyDataRes.data.filter(member => member.id !== Number(input.id)),
+                    userId: context.locals.user?.id,
+                    updatedAt: new Date(),
+                }).where(eq(familyData.userId, context.locals.user?.id!)).returning()
+
+                return {
+                    success: true,
+                    message: 'Family member deleted successfully',
+                    familyMemberRes
+                }
+            } catch (error) {
+                console.error('Error deleting family member:', error)
+                throw new ActionError({
+                    code: 'INTERNAL_SERVER_ERROR',
+                    message: 'Failed to delete family member'
+                })
+            }
+        }
+    }),
+    changePassword: defineAction({
+        accept: 'form',
+        input: z.object({
+            currentPassword: z.string(),
+            newPassword: z.string().refine(password => password.length >= 8, {
+                message: 'Password must be at least 8 characters long'
+            }),
+            confirmPassword: z.string(),
+        }).refine(data => data.newPassword === data.confirmPassword, {
+            message: 'Passwords do not match',
+            path: ['confirmPassword']
+        }),
+        handler: async (input, context) => {
+            try {
+                await ApprovedMiddleware(context)
+
+                const { user } = await auth.api.changePassword({
+                    body: {
+                        currentPassword: input.currentPassword,
+                        newPassword: input.newPassword,
+                        revokeOtherSessions: true
+                    },
+                })
+
+                return {
+                    success: true,
+                    message: 'Password changed successfully'
+                }
+            } catch (error) {
+                console.error('Error changing password:', error)
+                throw new ActionError({
+                    code: 'INTERNAL_SERVER_ERROR',
+                    message: 'Failed to change password'
+                })
             }
         }
     }),

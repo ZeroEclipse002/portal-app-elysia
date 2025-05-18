@@ -1,0 +1,248 @@
+---
+import { getMembers } from "@/db/queries";
+import Layout from "../layouts/Layout.astro";
+import { actions } from "astro:actions";
+import { Trash2Icon } from "lucide-react";
+import { isInputError } from "astro:actions";
+
+if (!Astro.locals.session) {
+    return Astro.redirect("/login");
+}
+
+await new Promise((resolve) => setTimeout(resolve, 1000));
+
+const [members] = await getMembers.execute({
+    userId: Astro.locals.session.userId,
+});
+
+console.log(members);
+
+const resultDelete = Astro.getActionResult(actions.deleteFamilyMember);
+const resultAdd = Astro.getActionResult(actions.addFamilyMember);
+const inputErrors = isInputError(resultAdd?.error)
+    ? resultAdd.error.fields
+    : {};
+---
+
+<div
+    class="flex flex-row items-start justify-center h-screen gap-8 p-8 bg-slate-50"
+>
+    <!-- Left: Member List -->
+    <div
+        class="w-full max-w-md bg-white border border-slate-200 rounded-xl shadow-sm p-6 overflow-y-auto h-[80vh]"
+    >
+        <h2 class="text-xl font-bold mb-4">Family Members</h2>
+        <div class="flex flex-col gap-4">
+            {
+                members?.data.length > 0 ? (
+                    members.data.map((member) => (
+                        <div class="flex flex-col gap-1 p-4 border rounded-lg bg-slate-50 relative">
+                            <h3 class="text-lg font-semibold">
+                                {member.fullName}
+                            </h3>
+                            <p class="text-gray-600">
+                                Relationship: {member.relationship}
+                            </p>
+                            <p class="text-gray-600">
+                                Date of Birth: {member.birthDate}
+                            </p>
+                            <p class="text-gray-600">Gender: {member.gender}</p>
+                            <p class="text-gray-600">Email: {member.email}</p>
+                            <p class="text-gray-600">Phone: {member.phone}</p>
+                            <form
+                                method="POST"
+                                action={actions.deleteFamilyMember}
+                            >
+                                <input
+                                    type="hidden"
+                                    name="id"
+                                    value={member.id}
+                                />
+                                <button
+                                    type="submit"
+                                    class="delete-btn absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-md"
+                                >
+                                    <Trash2Icon className="w-4 h-4" />
+                                </button>
+                            </form>
+                        </div>
+                    ))
+                ) : (
+                    <p class="text-gray-400">No members yet.</p>
+                )
+            }
+        </div>
+        {
+            resultDelete && !resultDelete.error ? (
+                <p class="text-green-500">{resultDelete.data.message}</p>
+            ) : (
+                <p class="text-red-500">{resultDelete?.error?.message}</p>
+            )
+        }
+    </div>
+
+    <!-- Right: Add Member Form -->
+    <div
+        class="w-full max-w-md bg-white border border-slate-200 rounded-xl shadow-sm p-6"
+    >
+        <h2 class="text-xl font-bold mb-4">Add a Member</h2>
+        <form
+            method="POST"
+            action={actions.addFamilyMember}
+            class="flex flex-col gap-6"
+        >
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1"
+                        >Full Name</label
+                    >
+                    <input
+                        name="fullName"
+                        type="text"
+                        required
+                        class="w-full p-2.5 rounded-lg border-slate-200 bg-slate-50 text-slate-700 border focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none placeholder:text-slate-400"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1"
+                        >Relationship</label
+                    >
+                    <input
+                        name="relationship"
+                        type="text"
+                        required
+                        class="w-full p-2.5 rounded-lg border-slate-200 bg-slate-50 text-slate-700 border focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none placeholder:text-slate-400"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1"
+                        >Date of Birth</label
+                    >
+                    <input
+                        name="birthDate"
+                        type="date"
+                        required
+                        class="w-full p-2.5 rounded-lg border-slate-200 bg-slate-50 text-slate-700 border focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none placeholder:text-slate-400"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1"
+                        >Gender</label
+                    >
+                    <select
+                        name="gender"
+                        required
+                        class="w-full p-2.5 rounded-lg border-slate-200 bg-slate-50 text-slate-700 border focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none"
+                    >
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1"
+                        >Email</label
+                    >
+                    <input
+                        type="email"
+                        name="email"
+                        class="w-full p-2.5 rounded-lg border-slate-200 bg-slate-50 text-slate-700 border focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none placeholder:text-slate-400"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1"
+                        >Phone</label
+                    >
+                    <input
+                        type="tel"
+                        name="phone"
+                        aria-describedby="phone-error"
+                        class="w-full p-2.5 rounded-lg border-slate-200 bg-slate-50 text-slate-700 border focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none placeholder:text-slate-400"
+                    />
+                    {
+                        inputErrors.phone && (
+                            <p class="text-red-500" id="phone-error">
+                                {inputErrors.phone}
+                            </p>
+                        )
+                    }
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1"
+                        >Birth Place</label
+                    >
+                    <input
+                        type="text"
+                        name="birthPlace"
+                        class="w-full p-2.5 rounded-lg border-slate-200 bg-slate-50 text-slate-700 border focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none placeholder:text-slate-400"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1"
+                        >Years of Residence</label
+                    >
+                    <input
+                        type="number"
+                        name="yearsOfResidence"
+                        class="w-full p-2.5 rounded-lg border-slate-200 bg-slate-50 text-slate-700 border focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none placeholder:text-slate-400"
+                    />
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1"
+                        >Complete Address</label
+                    >
+                    <textarea
+                        name="completeAddress"
+                        rows="2"
+                        class="w-full p-2.5 rounded-lg border-slate-200 bg-slate-50 text-slate-700 border focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none placeholder:text-slate-400 resize-none"
+                    ></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1"
+                        >Current Address</label
+                    >
+                    <textarea
+                        name="currentAddress"
+                        rows="2"
+                        class="w-full p-2.5 rounded-lg border-slate-200 bg-slate-50 text-slate-700 border focus:ring-2 focus:ring-slate-400 focus:border-slate-400 outline-none placeholder:text-slate-400 resize-none"
+                    ></textarea>
+                </div>
+            </div>
+            <div class="pt-2 flex justify-end">
+                <button
+                    type="submit"
+                    class="mt-2 bg-emerald-600 hover:bg-emerald-500 text-white p-3 rounded-lg transition-colors duration-200 font-semibold min-w-[140px]"
+                    >Add Member</button
+                >
+            </div>
+        </form>
+        {
+            resultAdd && !resultAdd.error && (
+                <p class="text-green-500">{resultAdd.data.message}</p>
+            )
+        }
+    </div>
+</div>
+
+<script>
+    // Wait for the DOM to be ready
+    document.addEventListener("astro:page-load", function () {
+        // Select all delete forms
+        document
+            .querySelectorAll('form[action*="deleteFamilyMember"]')
+            .forEach((form) => {
+                form.addEventListener("submit", function (e) {
+                    // Find the submit button inside this form
+                    const btn = form.querySelector(".delete-btn");
+                    if (btn) {
+                        // @ts-ignore
+                        btn.disabled = true;
+                        btn.classList.add("opacity-50", "cursor-not-allowed");
+                    }
+                });
+            });
+    });
+</script>

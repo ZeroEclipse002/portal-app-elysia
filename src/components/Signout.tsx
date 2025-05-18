@@ -1,4 +1,6 @@
 import { authClient } from "@/lib/auth-client"
+import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { User } from "lucide-react";
 
 export const Signout = () => {
     const handleSignout = async () => {
@@ -12,11 +14,25 @@ export const Signout = () => {
     }
 
     return (
-        <button
-            className="inline-flex items-center justify-center px-4 py-2 text-base font-medium leading-6 text-white whitespace-no-wrap bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600"
-            onClick={handleSignout}
-        >
-            Sign out
-        </button>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <User className="w-6 h-6" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+                <DropdownMenuItem>
+                    <a href="/add-member">
+                        Add Members
+                    </a>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                    <a href="/change-password">
+                        Change Password
+                    </a>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleSignout}>
+                    Sign out
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
     )
 }

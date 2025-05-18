@@ -193,4 +193,31 @@ export const requestRoutes = new Elysia()
                 chat
             };
         })
+        .get("/request-family", async ({ user }) => {
+            if (!user) {
+                throw new Error('Unauthorized');
+            }
+
+            const familyMembers = await db.query.familyData.findFirst({
+                where: (table, { eq }) => eq(table.userId, user.id)
+            })
+
+            if (!familyMembers) {
+                throw new Error('Family members not found');
+            }
+
+            return familyMembers.data
+        }, {
+            detail: {
+                tags: ['Requests'],
+                security: [{ BearerAuth: [] }],
+                description: 'Get family members for the authenticated user',
+                responses: {
+                    200: {
+                        description: 'Family members retrieved successfully',
+                        content: { 'application/json': { schema: { type: 'array', items: { type: 'object' } } } }
+                    }
+                }
+            }
+        })
     );

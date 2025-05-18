@@ -4,25 +4,28 @@ import { Dialog, DialogTitle, DialogHeader, DialogContent, DialogTrigger, Dialog
 import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from "./ui/select"
 import { Label } from "./ui/label"
 import { Input } from "./ui/input"
-import { cn } from "@/lib/utils"
+import { cn, fetcher } from "@/lib/utils"
 import { Textarea } from "./ui/textarea"
 import { actions, isInputError } from "astro:actions"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 import useSWR, { useSWRConfig } from "swr"
+import type { FamilyData } from "@/db/schema"
 
 
 
 export const RequestForm = () => {
     const { mutate } = useSWRConfig()
+    const { data: familyMembers, isLoading: isFamilyMembersLoading } = useSWR<FamilyData[]>('/api/request-family', fetcher)
     const [requestType, setRequestType] = useState<string>('')
     const [otherRequestType, setOtherRequestType] = useState<string>('')
     const [requestDetails, setRequestDetails] = useState<string>('')
+    const [familyMemberId, setFamilyMemberId] = useState<string>('')
     const [idPicture, setIdPicture] = useState<File | null>(null)
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-
+    const [purpose, setPurpose] = useState<string>('')
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         // Add form submission logic here
@@ -33,6 +36,8 @@ export const RequestForm = () => {
         formData.append('otherRequestType', otherRequestType)
         formData.append('requestDetails', requestDetails)
         formData.append('idPicture', idPicture as File)
+        formData.append('familyMemberId', familyMemberId || 'selfdoc')
+        formData.append('purpose', purpose || '')
 
         try {
             setLoading(true)
@@ -106,7 +111,7 @@ export const RequestForm = () => {
                             {error}
                         </div>
                     )}
-                    
+
                     <div className={cn("space-y-2", requestType === 'other' && "bg-gray-50 p-4 rounded-lg border border-gray-100")}>
                         <Label className="text-sm font-medium text-gray-700">Request Type</Label>
                         <Select onValueChange={(value) => setRequestType(value)}>
@@ -129,6 +134,52 @@ export const RequestForm = () => {
                                     placeholder="Please specify..."
                                     className="mt-1 bg-white border-gray-200"
                                 />
+                            </div>
+                        )}
+                        {requestType === 'document' && (
+                            <div className="pt-2">
+                                {isFamilyMembersLoading ? (
+                                    <div className="flex items-center justify-center">
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <Label className="text-sm font-medium text-gray-700">Select Family Member</Label>
+                                            <Select required defaultValue="selfdoc" value={familyMemberId} onValueChange={(value) => setFamilyMemberId(value)}>
+                                                <SelectTrigger className="bg-white border-gray-200">
+                                                    <SelectValue placeholder="Select Family Member" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem defaultChecked value="selfdoc">Self Document</SelectItem>
+                                                    {familyMembers?.map((member) => (
+                                                        <SelectItem key={member.id} value={member.id.toString()}>
+                                                            {member.fullName}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <p className="text-xs text-gray-500">
+                                                If you are requesting for a document for yourself, select "Self Document".
+                                                If you are requesting for a document for a family member, select the family member from the list.
+                                            </p>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label className="text-sm font-medium text-gray-700">Purpose</Label>
+                                            <Select value={purpose} onValueChange={(value) => setPurpose(value)}>
+                                                <SelectTrigger className="bg-white border-gray-200">
+                                                    <SelectValue placeholder="Select Purpose" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="clearance">Clearance</SelectItem>
+                                                    <SelectItem value="indigency">Indigency</SelectItem>
+                                                    <SelectItem value="certificate">Certificate</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -176,8 +227,8 @@ export const RequestForm = () => {
                         </div>
                     </div>
 
-                    <Button 
-                        type="submit" 
+                    <Button
+                        type="submit"
                         disabled={loading}
                         className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium"
                     >

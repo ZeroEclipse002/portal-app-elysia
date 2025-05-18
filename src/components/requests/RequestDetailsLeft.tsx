@@ -111,7 +111,7 @@ export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, 
 
     return (
         <div className="w-full lg:w-[40%] border rounded-xl shrink-0">
-            <div className="space-y-6 relative ">
+            <div className="space-y-6 relative pb-6">
                 {/* Header Section */}
                 <div className="px-6 py-4 bg-white rounded-t-xl border-b">
                     <div className="flex items-center gap-3 mb-3">
@@ -292,6 +292,36 @@ export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, 
                         </dl>
                     </div>
                 </div>
+                {request.request.type === 'document' && request.request.docUserDetails && (
+                    <div className="bg-white shadow-sm rounded-xl overflow-hidden mx-6 mt-6">
+                        <div className="px-6 py-4">
+                            <h2 className="text-lg font-semibold text-gray-900">Selected Credentials</h2>
+                            <div className="space-y-2 mt-2">
+                                <p className="text-sm text-gray-500">
+                                    Full Name: {request.request.docUserDetails.fullName}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    Birth Date: {request.request.docUserDetails.birthDate}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    Birth Place: {request.request.docUserDetails.birthPlace}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    Current Address: {request.request.docUserDetails.currentAddress}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    Years of Residence: {request.request.docUserDetails.yearsOfResidence}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    Complete Address: {request.request.docUserDetails.completeAddress}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    Purpose: {request.request.docUserDetails.purpose}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     )

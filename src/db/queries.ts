@@ -156,3 +156,8 @@ export const getUsers = db.query.user.findMany({
     limit: 5,
     offset: sql.placeholder('page'),
 }).prepare('getUsers')
+
+
+export const getMembers = db.query.familyData.findMany({
+    where: (table, { eq, sql }) => eq(table.userId, sql.placeholder("userId")),
+}).prepare('getMembers')

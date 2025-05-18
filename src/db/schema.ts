@@ -2,9 +2,16 @@ import { relations, sql } from "drizzle-orm";
 import { pgTable, text, integer, timestamp, boolean, pgEnum, check, unique, jsonb, serial, uuid } from "drizzle-orm/pg-core";
 
 export type FamilyData = {
+    id: number;
     fullName: string;
     birthDate: string;
+    birthPlace: string;
     gender: string;
+    email?: string;
+    phone?: string;
+    yearsOfResidence: string;
+    completeAddress: string;
+    currentAddress: string;
     relationship: string;
 }
 
@@ -28,9 +35,12 @@ export const userDetails = pgTable("user_details", {
     firstName: text("first_name"),
     lastName: text("last_name"),
     phone: text("phone"),
-    address: text("address"),
     birthDate: text("birth_date"),
+    birthPlace: text("birth_place"),
     gender: text("gender"),
+    yearsOfResidence: text("years_of_residence").notNull(),
+    completeAddress: text("complete_address").notNull(),
+    currentAddress: text("current_address").notNull(),
     createdAt: timestamp("created_at").notNull(),
     updatedAt: timestamp("updated_at").notNull()
 })
@@ -114,6 +124,15 @@ export const requests = pgTable("requests", {
     type: text("type").notNull(),
     details: text("details").notNull(),
     idPicture: text("id_picture").notNull(),
+    docUserDetails: jsonb("doc_user_details").$type<{
+        fullName: string;
+        birthDate: string;
+        birthPlace: string;
+        currentAddress: string;
+        yearsOfResidence: string;
+        completeAddress: string;
+        purpose: string;
+    }>(),
     status: text("status", { enum: ['submitted', 'reviewed', 'approved', 'rejected'] }).notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow()
 })
@@ -148,7 +167,7 @@ export const requestUpdateForm = pgTable("request_update_form", {
         currentAddress: string;
         completeAddress: string;
         purpose: string;
-        yearsOfResidence?: string; // New field for residence certificate
+        yearsOfResidence?: number; // New field for residence certificate
     }>(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
 })

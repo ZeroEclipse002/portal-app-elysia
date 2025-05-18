@@ -13,9 +13,12 @@ const InitialModalClient = ({ path }: { path: string }) => {
     firstName: "",
     lastName: "",
     phone: "",
-    address: "",
     birthDate: "",
     gender: "",
+    birthPlace: "",
+    yearsOfResidence: "",
+    currentAddress: "",
+    completeAddress: "",
   });
   const [error, setError] = useState<string[]>([]);
 
@@ -37,6 +40,10 @@ const InitialModalClient = ({ path }: { path: string }) => {
         birthDate: "",
         gender: "",
         relationship: "",
+        birthPlace: "",
+        yearsOfResidence: "",
+        completeAddress: "",
+        currentAddress: "",
       },
     ]);
   }, []);
@@ -58,15 +65,24 @@ const InitialModalClient = ({ path }: { path: string }) => {
         firstName: personalDetails.firstName,
         lastName: personalDetails.lastName,
         phone: personalDetails.phone,
-        address: personalDetails.address,
         birthDate: personalDetails.birthDate,
         gender: personalDetails.gender,
+        birthPlace: personalDetails.birthPlace,
+        yearsOfResidence: personalDetails.yearsOfResidence,
+        completeAddress: personalDetails.completeAddress,
+        currentAddress: personalDetails.currentAddress,
       },
       familyMembers: familyMembers.map((member) => ({
         fullName: member.fullName,
         birthDate: member.birthDate,
         gender: member.gender,
         relationship: member.relationship,
+        email: member.email,
+        phone: member.phone,
+        birthPlace: member.birthPlace,
+        yearsOfResidence: member.yearsOfResidence,
+        completeAddress: member.completeAddress,
+        currentAddress: member.currentAddress,
       })),
     };
 
@@ -187,6 +203,66 @@ const InitialModalClient = ({ path }: { path: string }) => {
             </select>
           </div>
         </div>
+        <div className="flex flex-col md:flex-row justify-between gap-4">
+          <div className="flex-1">
+            <label className={labelStyles}>Email</label>
+            <input
+              type="email"
+              value={member.email}
+              onChange={(e) => updateFamilyMember(index, "email", e.target.value)}
+              className={inputStyles}
+            />
+          </div>
+          <div className="flex-1">
+            <label className={labelStyles}>Phone</label>
+            <input
+              type="tel"
+              value={member.phone}
+              onChange={(e) => updateFamilyMember(index, "phone", e.target.value)}
+              className={inputStyles}
+            />
+          </div>
+        </div>
+        <div className="flex flex-col md:flex-row justify-between gap-4">
+          <div className="flex-1">
+            <label className={labelStyles}>Birth Place</label>
+            <input
+              type="text"
+              value={member.birthPlace}
+              onChange={(e) => updateFamilyMember(index, "birthPlace", e.target.value)}
+              className={inputStyles}
+            />
+          </div>
+          <div className="flex-1">
+            <label className={labelStyles}>Years of Residence</label>
+            <input
+              type="number"
+              value={member.yearsOfResidence}
+              onChange={(e) => updateFamilyMember(index, "yearsOfResidence", e.target.value)}
+              className={inputStyles}
+            />
+          </div>
+        </div>
+        <div className="flex flex-col md:flex-row justify-between gap-4">
+          <div className="flex-1">
+            <label className={labelStyles}>Complete Address</label>
+            <input
+              type="text"
+              value={member.completeAddress}
+              onChange={(e) => updateFamilyMember(index, "completeAddress", e.target.value)}
+              className={inputStyles}
+            />
+          </div>
+          <div className="flex-1">
+            <label className={labelStyles}>Current Address</label>
+            <input
+              type="text"
+              value={member.currentAddress}
+              onChange={(e) => updateFamilyMember(index, "currentAddress", e.target.value)}
+              className={inputStyles}
+            />
+          </div>
+        </div>
       </div>
     ));
   }, [familyMembers, updateFamilyMember]);
@@ -223,7 +299,7 @@ const InitialModalClient = ({ path }: { path: string }) => {
             ))}
           </div>
         )}
-        <div className="flex justify-between gap-4">
+        <div className="flex flex-col md:flex-row justify-between gap-4">
           <div className="flex-1">
             <label className={labelStyles}>First Name</label>
             <input
@@ -250,7 +326,7 @@ const InitialModalClient = ({ path }: { path: string }) => {
           </div>
         </div>
 
-        <div className="flex justify-between gap-4">
+        <div className="flex flex-col md:flex-row justify-between gap-4">
           <div className="flex-1">
             <label className={labelStyles}>Phone Number</label>
             <input
@@ -276,7 +352,7 @@ const InitialModalClient = ({ path }: { path: string }) => {
           </div>
         </div>
 
-        <div className="flex justify-between gap-4">
+        <div className="flex flex-col md:flex-row justify-between gap-4">
           <div className="flex-1">
             <label className={labelStyles}>Gender</label>
             <select
@@ -293,13 +369,53 @@ const InitialModalClient = ({ path }: { path: string }) => {
             </select>
           </div>
           <div className="flex-1">
-            <label className={labelStyles}>Address</label>
+            <label className={labelStyles}>Current Address</label>
             <input
               type="text"
               placeholder="Enter address"
-              value={personalDetails.address}
+              value={personalDetails.currentAddress}
               onChange={(e) =>
-                handlePersonalDetailsChange("address", e.target.value)
+                handlePersonalDetailsChange("currentAddress", e.target.value)
+              }
+              className={inputStyles}
+            />
+          </div>
+        </div>
+        <div className="flex flex-col md:flex-row justify-between gap-4">
+          <div className="flex-1">
+            <label className={labelStyles}>Birth Place</label>
+            <input
+              type="text"
+              placeholder="Enter birth place"
+              value={personalDetails.birthPlace}
+              onChange={(e) =>
+                handlePersonalDetailsChange("birthPlace", e.target.value)
+              }
+              className={inputStyles}
+            />
+          </div>
+          <div className="flex-1">
+            <label className={labelStyles}>Years of Residence</label>
+            <input
+              type="number"
+              placeholder="Enter years of residence"
+              value={personalDetails.yearsOfResidence}
+              onChange={(e) =>
+                handlePersonalDetailsChange("yearsOfResidence", e.target.value)
+              }
+              className={inputStyles}
+            />
+          </div>
+        </div>
+        <div className="flex flex-col md:flex-row justify-between gap-4">
+          <div className="flex-1">
+            <label className={labelStyles}>Complete Address</label>
+            <input
+              type="text"
+              placeholder="Enter complete address"
+              value={personalDetails.completeAddress}
+              onChange={(e) =>
+                handlePersonalDetailsChange("completeAddress", e.target.value)
               }
               className={inputStyles}
             />

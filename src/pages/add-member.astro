@@ -1,0 +1,15 @@
+---
+import AddMemberComp from "@/components/AddMemberComp.astro";
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout title="Add Member">
+    <AddMemberComp>
+        <div
+            slot="fallback"
+            class="flex flex-col items-center justify-center h-screen"
+        >
+            <h1 class="text-2xl font-bold">Loading...</h1>
+        </div>
+    </AddMemberComp>
+</Layout>

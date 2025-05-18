@@ -99,6 +99,13 @@ export const MainHeader = ({ role, pathname, approved, hasSession }: { role: str
                                         </NavigationMenuContent>
                                     </NavigationMenuItem>
                                 )}
+                                <NavigationMenuItem>
+                                    <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                                        <a href="/contact">
+                                            Contact Us
+                                        </a>
+                                    </NavigationMenuLink>
+                                </NavigationMenuItem>
                             </NavigationMenuList>
                         </NavigationMenu>
                     </nav>
