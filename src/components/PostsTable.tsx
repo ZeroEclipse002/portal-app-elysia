@@ -134,7 +134,7 @@ const createColumns = () => {
                                 </DropdownMenuItem>
                                 <DialogTrigger disabled={!!row.original.deletedAt} asChild>
                                     <DropdownMenuItem>
-                                        Archive
+                                        Delete
                                     </DropdownMenuItem>
                                 </DialogTrigger>
                             </DropdownMenuGroup>
@@ -151,7 +151,7 @@ const createColumns = () => {
                             </DialogDescription>
                         </DialogHeader>
                         <Button disabled={row.original.priority} onClick={() => deletePost(row.original.id)}>
-                            Archive
+                            Delete
                         </Button>
                     </DialogContent>
                 </Dialog>
