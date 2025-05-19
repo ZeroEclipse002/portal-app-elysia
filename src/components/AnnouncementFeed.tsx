@@ -32,6 +32,11 @@ export const AnnouncementFeed = () => {
         <div className="w-full bg-slate-50 p-6 min-h-screen">
             <div className="container mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {data.data?.length === 0 && (
+                        <div className="col-span-full text-center py-12 text-gray-500 text-lg">
+                            No announcements to display.
+                        </div>
+                    )}
                     {data.data?.map((announcement: any) => (
                         <a href={`/post/${announcement.id}`} key={announcement.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md hover:border-blue-100">
                             <div className="aspect-video relative overflow-hidden">

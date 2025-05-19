@@ -32,27 +32,33 @@ export const NewsFeed = () => {
         <div className="w-full bg-slate-50 p-6 min-h-screen">
             <div className="container mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {data.data?.map((announcement: any) => (
-                        <a href={`/post/${announcement.id}`} key={announcement.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md hover:border-blue-100">
-                            <div className="aspect-video relative overflow-hidden">
-                                <img
-                                    style={{
-                                        viewTransitionName: "post-image-" + announcement.id
-                                    }}
-                                    src={announcement.image}
-                                    alt={announcement.title}
-                                    className="w-full h-full object-cover transition-transform hover:scale-105"
-                                />
-                            </div>
-                            <div className="p-6">
-                                <h2 className="text-xl font-semibold text-gray-900 mb-3">{announcement.title}</h2>
-                                <p className="text-gray-600 leading-relaxed text-sm">{announcement.shortDescription}</p>
-                                <time dateTime={announcement.createdAt} className="text-sm text-gray-500 mt-4 block">
-                                    {new Date(announcement.createdAt).toLocaleDateString()}
-                                </time>
-                            </div>
-                        </a>
-                    ))}
+                    {Array.isArray(data.data) && data.data.length === 0 ? (
+                        <div className="col-span-full text-center py-12 text-gray-500 text-lg">
+                            No news to display.
+                        </div>
+                    ) : (
+                        data.data?.map((announcement: any) => (
+                            <a href={`/post/${announcement.id}`} key={announcement.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md hover:border-blue-100">
+                                <div className="aspect-video relative overflow-hidden">
+                                    <img
+                                        style={{
+                                            viewTransitionName: "post-image-" + announcement.id
+                                        }}
+                                        src={announcement.image}
+                                        alt={announcement.title}
+                                        className="w-full h-full object-cover transition-transform hover:scale-105"
+                                    />
+                                </div>
+                                <div className="p-6">
+                                    <h2 className="text-xl font-semibold text-gray-900 mb-3">{announcement.title}</h2>
+                                    <p className="text-gray-600 leading-relaxed text-sm">{announcement.shortDescription}</p>
+                                    <time dateTime={announcement.createdAt} className="text-sm text-gray-500 mt-4 block">
+                                        {new Date(announcement.createdAt).toLocaleDateString()}
+                                    </time>
+                                </div>
+                            </a>
+                        ))
+                    )}
                 </div>
                 {isValidating && (
                     <div className="flex justify-center mt-6">
