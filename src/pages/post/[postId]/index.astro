@@ -19,19 +19,23 @@ if (!post) {
 ---
 
 <Layout>
-  <div class="max-w-6xl flex flex-col items-center gap-12 mx-auto px-4 py-12">
-    <header class="mb-12 text-center">
+  <div
+    class="w-full max-w-6xl flex flex-col items-center gap-8 md:gap-12 mx-auto px-4 py-8 md:py-12"
+  >
+    <header class="w-full mb-8 md:mb-12 text-center">
       <h1
         transition:name={`post-title-${post.id}`}
-        class="text-4xl md:text-5xl font-bold text-slate-900 mb-4"
+        class="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-3 md:mb-4"
       >
         {post.title}
       </h1>
-      <div class="flex items-center justify-center gap-4 text-sm text-slate-700">
+      <div
+        class="flex items-center justify-center gap-3 md:gap-4 text-xs sm:text-sm text-slate-700"
+      >
         <span class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-2"
+            class="h-4 w-4 md:h-5 md:w-5 mr-1.5 md:mr-2"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -49,7 +53,7 @@ if (!post) {
         </span>
       </div>
       <p
-        class="mt-6 text-lg text-slate-600 font-light leading-relaxed max-w-2xl mx-auto"
+        class="mt-4 md:mt-6 text-base md:text-lg text-slate-600 font-light leading-relaxed max-w-2xl mx-auto px-2 sm:px-4"
       >
         {post.shortDescription}
       </p>
@@ -57,18 +61,20 @@ if (!post) {
 
     {
       post.image && (
-        <div class="mb-12 rounded-2xl w-[70%] overflow-hidden shadow-xl">
+        <div class="mb-8 md:mb-12 rounded-lg md:rounded-2xl w-[90%] sm:w-[80%] md:w-[70%] overflow-hidden shadow-lg md:shadow-xl">
           <img
             transition:name={`post-image-${post.id}`}
             src={post.image}
             alt={post.title}
-            class="w-full h-[400px] object-cover"
+            class="w-full h-[200px] sm:h-[300px] md:h-[400px] object-cover"
           />
         </div>
       )
     }
     <Separator />
-    <div class="prose prose-lg max-w-none prose-slate">
+    <div
+      class="prose prose-sm sm:prose md:prose-lg max-w-none prose-slate px-2 sm:px-4"
+    >
       <MainViewer client:only="react" postId={postId} />
     </div>
   </div>

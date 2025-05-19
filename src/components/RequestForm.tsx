@@ -98,14 +98,14 @@ export const RequestForm = () => {
                     Submit New Request
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent className="sm:max-w-xl max-w-full w-full p-2 sm:p-6 max-sm:scale-[0.92] max-sm:!max-w-[98vw] max-sm:!w-[98vw] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-semibold text-gray-900">Submit New Request</DialogTitle>
                     <DialogDescription className="text-gray-500 text-sm">
                         Please fill out the form below to submit a new request.
                     </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6 max-sm:space-y-4 overflow-visible">
                     {error && (
                         <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg p-3">
                             {error}

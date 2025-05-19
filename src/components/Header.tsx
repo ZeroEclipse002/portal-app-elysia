@@ -2,112 +2,146 @@ import { cn } from "@/lib/utils"
 import { ModalAuth } from "./ModalAuth"
 import { Signout } from "./Signout"
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "./ui/navigation-menu"
-import React from "react"
+import React, { useState } from "react"
 
 
 
 
 export const MainHeader = ({ role, pathname, approved, hasSession }: { role: string | null, pathname: string, approved: boolean, hasSession: boolean }) => {
+    const [mobileNavOpen, setMobileNavOpen] = useState(false);
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const closeTimeout = React.useRef<NodeJS.Timeout | null>(null);
+
+    const toggleDropdown = (name: string) => setOpenDropdown(openDropdown === name ? null : name);
+    const handleMouseEnter = (name: string) => {
+        if (closeTimeout.current) clearTimeout(closeTimeout.current);
+        setOpenDropdown(name);
+    };
+    const handleMouseLeave = () => {
+        closeTimeout.current = setTimeout(() => setOpenDropdown(null), 120);
+    };
+    const handleDropdownMouseEnter = () => {
+        if (closeTimeout.current) clearTimeout(closeTimeout.current);
+    };
+    const handleDropdownMouseLeave = () => {
+        closeTimeout.current = setTimeout(() => setOpenDropdown(null), 120);
+    };
     return (
         <section className="w-full px-8 text-gray-700 bg-white">
             <div className="container flex flex-col flex-wrap items-center justify-between py-5 mx-auto md:flex-row max-w-7xl">
                 {/* Logo and Navigation Section */}
-                <div className="relative flex flex-col md:flex-row">
+                <div className="relative flex flex-col md:flex-row w-full md:w-auto">
                     {/* Logo */}
                     <a href="/" className="flex items-center mb-5 font-medium text-gray-900 md:mb-0">
                         <img src="/marawoy-logo.png" alt="Marawoy Logo" className="h-12 w-auto" />
                     </a>
 
+                    {/* Hamburger Button */}
+                    <button
+                        className="md:hidden absolute right-0 top-0 mt-2 mr-2 z-20 p-2 rounded focus:outline-none focus:ring-2 focus:ring-red-400"
+                        aria-label="Toggle navigation"
+                        onClick={() => setMobileNavOpen((open) => !open)}
+                    >
+                        <span className="block w-6 h-0.5 bg-gray-800 mb-1 transition-all" style={{ transform: mobileNavOpen ? 'rotate(45deg) translateY(7px)' : 'none' }}></span>
+                        <span className={`block w-6 h-0.5 bg-gray-800 mb-1 transition-all ${mobileNavOpen ? 'opacity-0' : ''}`}></span>
+                        <span className="block w-6 h-0.5 bg-gray-800 transition-all" style={{ transform: mobileNavOpen ? 'rotate(-45deg) translateY(-7px)' : 'none' }}></span>
+                    </button>
+
                     {/* Main Navigation */}
-                    <nav className="flex flex-wrap items-center mb-5 text-base md:mb-0 md:pl-8 md:ml-8 md:border-l md:border-gray-200">
-                        <NavigationMenu>
-                            <NavigationMenuList>
-                                <NavigationMenuItem>
-                                    <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                                        <a href="/">
-                                            Home
-                                        </a>
-                                    </NavigationMenuLink>
-                                </NavigationMenuItem>
+                    <nav
+                        className={
+                            `mb-5 text-base md:mb-0 md:pl-8 md:ml-8 md:border-l md:border-gray-200 ` +
+                            `w-full md:w-auto ` +
+                            (mobileNavOpen ? 'block' : 'hidden') +
+                            ' md:flex'
+                        }
+                    >
+                        <div className="bg-white shadow-md rounded-b-md md:shadow-none md:bg-transparent md:rounded-none">
+                            <ul className="flex flex-col md:flex-row gap-2 md:gap-4">
+                                <li>
+                                    <a href="/" className="block px-4 py-2 rounded hover:bg-gray-100">Home</a>
+                                </li>
                                 {approved && (
-                                    <NavigationMenuItem>
-                                        <NavigationMenuTrigger>Services</NavigationMenuTrigger>
-                                        <NavigationMenuContent className="flex flex-col gap-2 p-2">
-                                            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-                                                <ListItem
-                                                    key={'/tickets'}
-
-                                                    title={'Tickets'}
-                                                    href={'/tickets'}
-                                                >
-                                                    View and manage requests/tickets
-                                                </ListItem>
-                                                <ListItem
-                                                    key={'/concern'}
-                                                    title={'Concern Board'}
-                                                    href={'/concern'}
-                                                >
-                                                    Submit concerns and feedback
-                                                </ListItem>
-                                            </ul>
-                                        </NavigationMenuContent>
-                                    </NavigationMenuItem>
+                                    <li className="relative"
+                                        onMouseLeave={handleMouseLeave}
+                                        onMouseEnter={() => handleMouseEnter('services')}
+                                    >
+                                        <button
+                                            className="flex items-center px-4 py-2 rounded hover:bg-gray-100 w-full md:w-auto"
+                                            onClick={() => toggleDropdown('services')}
+                                            aria-haspopup="true"
+                                            aria-expanded={openDropdown === 'services'}
+                                        >
+                                            Services
+                                            <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                                        </button>
+                                        {openDropdown === 'services' && (
+                                            <div
+                                                className="absolute left-0 top-full w-48 bg-white border rounded shadow-md z-30 mt-0"
+                                                onMouseEnter={handleDropdownMouseEnter}
+                                                onMouseLeave={handleDropdownMouseLeave}
+                                            >
+                                                <a href="/tickets" className="block px-4 py-2 hover:bg-gray-100">Tickets</a>
+                                                <a href="/concern" className="block px-4 py-2 hover:bg-gray-100">Concern Board</a>
+                                            </div>
+                                        )}
+                                    </li>
                                 )}
-                                <NavigationMenuItem>
-                                    <NavigationMenuTrigger>Feed</NavigationMenuTrigger>
-                                    <NavigationMenuContent className="flex flex-col gap-2 p-2">
-                                        <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-                                            <ListItem
-                                                key={'/news'}
-
-                                                title={'News'}
-                                                href={'/news'}
-                                            >
-                                                View all recent and old news here
-                                            </ListItem>
-                                            <ListItem
-                                                key={'/announcements'}
-                                                title={'Announcements'}
-                                                href={'/announcements'}
-                                            >
-                                                View all announcements here
-                                            </ListItem>
-                                        </ul>
-                                    </NavigationMenuContent>
-                                </NavigationMenuItem>
+                                <li className="relative"
+                                    onMouseLeave={handleMouseLeave}
+                                    onMouseEnter={() => handleMouseEnter('feed')}
+                                >
+                                    <button
+                                        className="flex items-center px-4 py-2 rounded hover:bg-gray-100 w-full md:w-auto"
+                                        onClick={() => toggleDropdown('feed')}
+                                        aria-haspopup="true"
+                                    aria-expanded={openDropdown === 'feed'}
+                                    >
+                                        Feed
+                                        <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                                    </button>
+                                    {openDropdown === 'feed' && (
+                                        <div
+                                            className="absolute left-0 top-full w-48 bg-white border rounded shadow-md z-30 mt-0"
+                                            onMouseEnter={handleDropdownMouseEnter}
+                                            onMouseLeave={handleDropdownMouseLeave}
+                                        >
+                                            <a href="/news" className="block px-4 py-2 hover:bg-gray-100">News</a>
+                                            <a href="/announcements" className="block px-4 py-2 hover:bg-gray-100">Announcements</a>
+                                        </div>
+                                    )}
+                                </li>
                                 {role === 'admin' && (
-                                    <NavigationMenuItem>
-                                        <NavigationMenuTrigger>Admin</NavigationMenuTrigger>
-                                        <NavigationMenuContent className="flex flex-col gap-2 p-2">
-                                            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-                                                <ListItem
-                                                    key={'/dashboard'}
-
-                                                    title={'Dashboard'}
-                                                    href={'/admin'}
-                                                >
-                                                    Manage Users and Posts
-                                                </ListItem>
-                                                <ListItem
-                                                    key={'/grid'}
-                                                    title={'Grid'}
-                                                    href={'/grid'}
-                                                >
-                                                    Simple layout editor for index page
-                                                </ListItem>
-                                            </ul>
-                                        </NavigationMenuContent>
-                                    </NavigationMenuItem>
+                                    <li className="relative"
+                                        onMouseLeave={handleMouseLeave}
+                                        onMouseEnter={() => handleMouseEnter('admin')}
+                                    >
+                                        <button
+                                            className="flex items-center px-4 py-2 rounded hover:bg-gray-100 w-full md:w-auto"
+                                            onClick={() => toggleDropdown('admin')}
+                                            aria-haspopup="true"
+                                            aria-expanded={openDropdown === 'admin'}
+                                        >
+                                            Admin
+                                            <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                                        </button>
+                                        {openDropdown === 'admin' && (
+                                            <div
+                                                className="absolute left-0 top-full w-48 bg-white border rounded shadow-md z-30 mt-0"
+                                                onMouseEnter={handleDropdownMouseEnter}
+                                                onMouseLeave={handleDropdownMouseLeave}
+                                            >
+                                                <a href="/admin" className="block px-4 py-2 hover:bg-gray-100">Dashboard</a>
+                                                <a href="/grid" className="block px-4 py-2 hover:bg-gray-100">Grid</a>
+                                            </div>
+                                        )}
+                                    </li>
                                 )}
-                                <NavigationMenuItem>
-                                    <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                                        <a href="/contact">
-                                            Contact Us
-                                        </a>
-                                    </NavigationMenuLink>
-                                </NavigationMenuItem>
-                            </NavigationMenuList>
-                        </NavigationMenu>
+                                <li>
+                                    <a href="/contact" className="block px-4 py-2 rounded hover:bg-gray-100">Contact Us</a>
+                                </li>
+                            </ul>
+                        </div>
                     </nav>
                 </div>
 
