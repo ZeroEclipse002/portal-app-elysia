@@ -3,6 +3,9 @@ import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigge
 import { User } from "lucide-react";
 
 export const Signout = () => {
+
+    const { data: session } = authClient.useSession()
+
     const handleSignout = async () => {
         const { data, error } = await authClient.signOut({
             fetchOptions: {
@@ -16,7 +19,10 @@ export const Signout = () => {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <User className="w-6 h-6" />
+                <div className="flex items-center gap-2">
+                    <User className="w-6 h-6" />
+                    <span>{session?.user?.name}</span>
+                </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
                 <DropdownMenuItem>

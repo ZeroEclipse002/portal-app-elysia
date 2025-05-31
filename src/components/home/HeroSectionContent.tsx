@@ -59,21 +59,19 @@ export function HeroSectionContent({ recent, priority, initialData }: HeroSectio
                     <div className="backdrop-blur-md bg-white/80 rounded-full p-1 flex gap-2 sm:gap-3 shadow-sm border border-red-100">
                         <button
                             onClick={() => handleStateChange("recent")}
-                            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all duration-300 ${
-                                state === "recent"
-                                    ? "bg-red-700 text-white shadow-md"
-                                    : "text-red-700 hover:bg-red-50"
-                            }`}
+                            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all duration-300 ${state === "recent"
+                                ? "bg-red-700 text-white shadow-md"
+                                : "text-red-700 hover:bg-red-50"
+                                }`}
                         >
                             Recent {recent.length > 0 && <span className="ml-1 text-xs sm:text-sm opacity-75">({recent.length})</span>}
                         </button>
                         <button
                             onClick={() => handleStateChange("main")}
-                            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all duration-300 ${
-                                state === "main"
-                                    ? "bg-red-700 text-white shadow-md"
-                                    : "text-red-700 hover:bg-red-50"
-                            }`}
+                            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all duration-300 ${state === "main"
+                                ? "bg-red-700 text-white shadow-md"
+                                : "text-red-700 hover:bg-red-50"
+                                }`}
                         >
                             Main {priority.length > 0 && <span className="ml-1 text-xs sm:text-sm opacity-75">({priority.length})</span>}
                         </button>
@@ -133,6 +131,24 @@ export function HeroSectionContent({ recent, priority, initialData }: HeroSectio
                                 {currentIndex + 1} of {currentArray.length}
                             </Badge>
                         </div>
+
+
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 justify-center mt-4 sm:mt-8">
+                            <a
+                                href={data.id ? `/post/${data.id}` : "#"}
+                                className="group px-6 sm:px-8 py-3 sm:py-4 bg-red-700 text-white rounded-full transition-all duration-300 shadow-lg hover:shadow-xl text-base sm:text-lg hover:scale-105 hover:bg-red-600"
+                            >
+                                Visit {data.type}
+                                <span className="inline-block transition-transform group-hover:translate-x-1 ml-2">→</span>
+                            </a>
+                            <a
+                                href={data.type === "announcement" ? "announcements" : "news"}
+                                className="px-6 sm:px-8 py-3 sm:py-4 bg-white/50 backdrop-blur-sm border border-red-100 rounded-full hover:bg-white transition-all duration-300 shadow-sm hover:shadow-md text-base sm:text-lg hover:scale-105 text-red-700"
+                            >
+                                View more {data.type}
+                            </a>
+                        </div>
+
                         <h1 style={{
                             viewTransitionName: "post-title-" + data.id
                         }} className="text-3xl sm:text-5xl md:text-7xl font-bold text-white leading-tight mb-2 sm:mb-4">
@@ -152,23 +168,7 @@ export function HeroSectionContent({ recent, priority, initialData }: HeroSectio
                             </p>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 justify-center mt-4 sm:mt-8">
-                            <a
-                                href={data.id ? `/post/${data.id}` : "#"}
-                                className="group px-6 sm:px-8 py-3 sm:py-4 bg-red-700 text-white rounded-full transition-all duration-300 shadow-lg hover:shadow-xl text-base sm:text-lg hover:scale-105 hover:bg-red-600"
-                            >
-                                Visit {data.type}
-                                <span className="inline-block transition-transform group-hover:translate-x-1 ml-2">→</span>
-                            </a>
-                            <a
-                                href={data.type === "announcement" ? "announcements" : "news"}
-                                className="px-6 sm:px-8 py-3 sm:py-4 bg-white/50 backdrop-blur-sm border border-red-100 rounded-full hover:bg-white transition-all duration-300 shadow-sm hover:shadow-md text-base sm:text-lg hover:scale-105 text-red-700"
-                            >
-                                View more {data.type}
-                            </a>
-                        </div>
-
-                        <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-red-100/20">
+                        {/* <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-red-100/20">
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-white/80">
                                 <div className="text-center sm:text-left">
                                     <p className="text-xs sm:text-sm uppercase tracking-wider">Category</p>
@@ -183,7 +183,7 @@ export function HeroSectionContent({ recent, priority, initialData }: HeroSectio
                                     <p className="font-medium text-white text-sm sm:text-base">{data.id}</p>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 )}
             </div>

@@ -238,6 +238,31 @@ export const admin = {
             }
         }
     }),
+    unarchivePost: defineAction({
+        accept: 'json',
+        input: z.object({
+            postId: z.string()
+        }),
+        handler: async (input, context) => {
+            await authMiddleware(context)
+
+            const [post] = await db.update(posts).set({
+                deletedAt: null
+            }).where(eq(posts.id, input.postId)).returning()
+
+            if (!post) {
+                throw new ActionError({
+                    code: 'NOT_FOUND',
+                    message: 'Post not found'
+                })
+            }
+
+            return {
+                success: true,
+                postId: post.id
+            }
+        }
+    }),
     editPostDetails: defineAction({
         accept: 'form',
         input: z.object({

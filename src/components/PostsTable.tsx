@@ -46,6 +46,17 @@ async function deletePost(postId: string) {
     }
 }
 
+async function unarchivePost(postId: string) {
+    try {
+        const { data, error } = await actions.admin.unarchivePost({ postId })
+        if (!error) {
+            window.location.reload()
+        }
+    } catch (error) {
+        console.error('Failed to unarchive post:', error)
+    }
+}
+
 const createColumns = () => {
     const columns: ColumnDef<PostTable>[] = [
         {
@@ -132,11 +143,17 @@ const createColumns = () => {
                                         Edit
                                     </a>
                                 </DropdownMenuItem>
-                                <DialogTrigger disabled={!!row.original.deletedAt} asChild>
-                                    <DropdownMenuItem>
-                                        Delete
+                                {!row.original.deletedAt ? (
+                                    <DialogTrigger disabled={!!row.original.deletedAt} asChild>
+                                        <DropdownMenuItem>
+                                            Delete
+                                        </DropdownMenuItem>
+                                    </DialogTrigger>
+                                ) : (
+                                    <DropdownMenuItem onClick={() => unarchivePost(row.original.id)}>
+                                        Unarchive
                                     </DropdownMenuItem>
-                                </DialogTrigger>
+                                )}
                             </DropdownMenuGroup>
                         </DropdownMenuContent>
                     </DropdownMenu>

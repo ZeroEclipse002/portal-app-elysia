@@ -30,10 +30,10 @@ export const MainHeader = ({ role, pathname, approved, hasSession }: { role: str
         <section className="w-full px-8 text-gray-700 bg-white">
             <div className="container flex flex-col flex-wrap items-center justify-between py-5 mx-auto md:flex-row max-w-7xl">
                 {/* Logo and Navigation Section */}
-                <div className="relative flex flex-col md:flex-row w-full md:w-auto">
+                <div className="relative text-lg flex flex-col md:flex-row w-full md:w-auto justify-center items-center">
                     {/* Logo */}
                     <a href="/" className="flex items-center mb-5 font-medium text-gray-900 md:mb-0">
-                        <img src="/marawoy-logo.png" alt="Marawoy Logo" className="h-12 w-auto" />
+                        <img src="/marawoy-logo.png" alt="Marawoy Logo" className=" h-24 w-auto" />
                     </a>
 
                     {/* Hamburger Button */}
@@ -53,11 +53,11 @@ export const MainHeader = ({ role, pathname, approved, hasSession }: { role: str
                             `mb-5 text-base md:mb-0 md:pl-8 md:ml-8 md:border-l md:border-gray-200 ` +
                             `w-full md:w-auto ` +
                             (mobileNavOpen ? 'block' : 'hidden') +
-                            ' md:flex'
+                            ' md:flex justify-center'
                         }
                     >
                         <div className="bg-white shadow-md rounded-b-md md:shadow-none md:bg-transparent md:rounded-none">
-                            <ul className="flex flex-col md:flex-row gap-2 md:gap-4">
+                            <ul className="flex flex-col justify-center md:flex-row gap-2 md:gap-4">
                                 <li>
                                     <a href="/" className="block px-4 py-2 rounded hover:bg-gray-100">Home</a>
                                 </li>
@@ -81,8 +81,8 @@ export const MainHeader = ({ role, pathname, approved, hasSession }: { role: str
                                                 onMouseEnter={handleDropdownMouseEnter}
                                                 onMouseLeave={handleDropdownMouseLeave}
                                             >
-                                                <a href="/tickets" className="block px-4 py-2 hover:bg-gray-100">Tickets</a>
-                                                <a href="/concern" className="block px-4 py-2 hover:bg-gray-100">Concern Board</a>
+                                                <a href="/tickets" className="block px-4 py-2 hover:bg-gray-100">Requests</a>
+                                                <a href="/concern" className="block px-4 py-2 hover:bg-gray-100">Incident Reports</a>
                                             </div>
                                         )}
                                     </li>
@@ -95,7 +95,7 @@ export const MainHeader = ({ role, pathname, approved, hasSession }: { role: str
                                         className="flex items-center px-4 py-2 rounded hover:bg-gray-100 w-full md:w-auto"
                                         onClick={() => toggleDropdown('feed')}
                                         aria-haspopup="true"
-                                    aria-expanded={openDropdown === 'feed'}
+                                        aria-expanded={openDropdown === 'feed'}
                                     >
                                         Feed
                                         <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
@@ -132,7 +132,7 @@ export const MainHeader = ({ role, pathname, approved, hasSession }: { role: str
                                                 onMouseLeave={handleDropdownMouseLeave}
                                             >
                                                 <a href="/admin" className="block px-4 py-2 hover:bg-gray-100">Dashboard</a>
-                                                <a href="/grid" className="block px-4 py-2 hover:bg-gray-100">Grid</a>
+                                                <a href="/grid" className="block px-4 py-2 hover:bg-gray-100">Labels</a>
                                             </div>
                                         )}
                                     </li>

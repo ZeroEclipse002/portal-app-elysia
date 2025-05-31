@@ -48,6 +48,18 @@ interface User {
 }
 
 export function Component({ users }: { users: User[] }) {
+  // Define red shades to use for all charts
+  const redShades = [
+    "hsl(0, 70%, 50%)",   // Standard red
+    "hsl(0, 70%, 60%)",   // Lighter red
+    "hsl(0, 70%, 40%)",   // Darker red
+    "hsl(0, 70%, 70%)",   // Light red
+    "hsl(0, 70%, 30%)",   // Dark red
+    "hsl(0, 70%, 80%)",   // Very light red
+    "hsl(0, 70%, 20%)",   // Very dark red
+    "hsl(0, 60%, 55%)",   // Muted red
+  ];
+
   const relationshipData = React.useMemo(() => {
     const relationships: { [key: string]: number } = {};
     users.forEach((user) => {
@@ -58,10 +70,10 @@ export function Component({ users }: { users: User[] }) {
         });
       }
     });
-    return Object.entries(relationships).map(([relationship, count]) => ({
+    return Object.entries(relationships).map(([relationship, count], index) => ({
       type: relationship,
       count,
-      fill: `var(--color-${relationship})`,
+      fill: redShades[index % redShades.length],
     }));
   }, [users]);
 
@@ -74,25 +86,25 @@ export function Component({ users }: { users: User[] }) {
         });
       }
     });
-    return Object.entries(genders).map(([gender, count]) => ({
+    return Object.entries(genders).map(([gender, count], index) => ({
       type: gender,
       count,
-      fill: `var(--color-${gender})`,
+      fill: redShades[index % redShades.length],
     }));
   }, [users]);
 
   function getBracketColor(bracket: string): string {
     switch (bracket) {
       case "1-14":
-        return "var(--color-age-child)";
+        return "hsl(0, 70%, 50%)";  // Standard red
       case "14-24 Youth":
-        return "var(--color-age-youth)";
+        return "hsl(0, 70%, 60%)";  // Lighter red
       case "25-59":
-        return "var(--color-age-adult)";
+        return "hsl(0, 70%, 40%)";  // Darker red
       case "60+ Senior":
-        return "var(--color-age-senior)";
+        return "hsl(0, 70%, 30%)";  // Dark red
       default:
-        return "var(--color-age-default)";
+        return "hsl(0, 70%, 50%)";  // Default red
     }
   }
 
