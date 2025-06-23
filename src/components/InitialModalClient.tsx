@@ -283,7 +283,7 @@ const InitialModalClient = ({ path }: { path: string }) => {
   // Main Modal Content
   const MainModalContent = useMemo(
     () => (
-      <div className="flex flex-col gap-5 bg-white p-4 md:p-7 rounded-xl shadow-sm">
+      <div className="flex flex-col gap-5 bg-white p-4 md:p-7 rounded-xl shadow-sm h-full max-h-[90vh]">
         <h2 className="text-xl font-semibold text-slate-800">
           Personal Details
         </h2>
@@ -454,7 +454,7 @@ const InitialModalClient = ({ path }: { path: string }) => {
       {/* Nested Modal for Family Members */}
       {nestedModal && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-0 md:p-4">
-          <div className="bg-white rounded-xl w-full h-full md:w-[80%] md:h-[80vh] md:max-w-4xl flex flex-col">
+          <div className="bg-white rounded-xl w-full h-full max-h-[50vh] max-w-4xl flex flex-col m-2">
             {/* Fixed Header */}
             <div className="flex-shrink-0 flex flex-col md:flex-row items-start md:items-center justify-between p-4 md:p-7 border-b border-slate-100">
               <h2 className="text-xl font-semibold text-slate-800 mb-4 md:mb-0">

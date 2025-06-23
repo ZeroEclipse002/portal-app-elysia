@@ -155,6 +155,7 @@ export const getUsers = db.query.user.findMany({
     },
     limit: 5,
     offset: sql.placeholder('page'),
+    orderBy: (table, { asc }) => [asc(table.approved)], // Sort unapproved users first
 }).prepare('getUsers')
 
 

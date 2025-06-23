@@ -12,13 +12,19 @@ const data = Astro.locals;
   <div class="w-full h-fit bg-gradient-to-b from-red-50 via-white to-red-100">
     <SequenceComp server:defer>
       <div slot="fallback" class="w-full h-full bg-red-50 overflow-x-hidden">
-        <div class="w-full max-w-[90vw] md:max-w-[85vw] lg:max-w-[80vw] mx-auto py-8 space-y-8 animate-pulse">
-          {/* Marquee Section */}
-          <div class="w-full h-24 bg-gradient-to-r from-red-100 via-white to-red-100 rounded-xl">
+        <div
+          class="w-full max-w-[90vw] md:max-w-[85vw] lg:max-w-[80vw] mx-auto py-8 space-y-8 animate-pulse"
+        >
+          {/* News & Announcement block */}
+          <div
+            class="w-full h-24 bg-gradient-to-r from-red-100 via-white to-red-100 rounded-xl"
+          >
           </div>
 
-          {/* Hero Section */}
-          <div class="w-full min-h-[85vh] bg-gradient-to-br from-red-100 via-white to-red-200 rounded-2xl p-8 flex flex-col justify-center items-center">
+          {/* Highlights Block */}
+          <div
+            class="w-full min-h-[85vh] bg-gradient-to-br from-red-100 via-white to-red-200 rounded-2xl p-8 flex flex-col justify-center items-center"
+          >
             <div class="w-full max-w-3xl space-y-6">
               <div class="h-8 w-24 bg-red-100 rounded-full"></div>
               <div class="h-12 w-3/4 bg-red-100 rounded-lg"></div>
@@ -30,11 +36,13 @@ const data = Astro.locals;
             </div>
           </div>
 
-          {/* Carousel Section */}
-          <div class="w-full h-96 bg-gradient-to-r from-red-200 via-white to-red-200 rounded-xl">
+          {/* Carousel block */}
+          <div
+            class="w-full h-96 bg-gradient-to-r from-red-200 via-white to-red-200 rounded-xl"
+          >
           </div>
 
-          {/* List Section */}
+          {/* Downloadable Content block */}
           <div class="w-full space-y-4">
             {
               [1, 2, 3].map(() => (

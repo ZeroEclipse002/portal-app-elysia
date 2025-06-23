@@ -40,7 +40,7 @@ export function HeroSectionContent({ recent, priority, initialData }: HeroSectio
     };
 
     return (
-        <div className="w-full flex justify-center items-center mb-6">
+        <div className="w-full flex justify-center items-center mb-6 mt-10">
             <div className="w-[98vw] sm:w-[95vw] md:w-[85vw] lg:w-[80vw] overflow-hidden relative min-h-[70vh] sm:min-h-[80vh] md:min-h-[85vh] rounded-2xl p-4 sm:p-6 md:p-8 lg:p-16 flex flex-col justify-center items-center shadow-lg backdrop-blur-sm">
                 {data.image && (
                     <div className="absolute -z-10 inset-0">

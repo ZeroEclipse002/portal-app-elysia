@@ -1,5 +1,4 @@
 import { Elysia } from 'elysia';
-import { cache } from '../utils/cache';
 import { getRequests, getRequest, getRequestLogs, getUserFamily } from '@/db/queries';
 import { utapi } from '@/utconfig/uploadthing';
 import _ from 'lodash';
@@ -72,26 +71,12 @@ export const requestRoutes = new Elysia()
                 expiresIn: 60 * 60
             })
 
-            const cacheKey = `request:${params.requestId}`;
-            const cached = await cache.get(cacheKey);
-
-            if (cached) {
-                return {
-                    request: {
-                        ...cached.request,
-                        status: request.status,
-                    }
-                };
-            }
-
             const response = {
                 request: {
                     ..._.omit(request, ['idPicture', 'status']),
                     idPicture: pictureUrl
                 }
             };
-
-            await cache.set(cacheKey, response, { ex: 3600 }); // Cache for 1 hour
 
             return {
                 request: {

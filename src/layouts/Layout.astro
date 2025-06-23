@@ -30,7 +30,7 @@ console.log("Astro.locals.user", Astro.locals.user);
       role={status}
       pathname={Astro.url.pathname}
       approved={approved}
-      client:load
+      client:only="react"
     />
     <Toaster transition:persist client:only />
     <slot />

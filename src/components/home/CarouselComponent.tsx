@@ -61,9 +61,9 @@ export default function CarouselComponent({ data }: CarouselProps) {
 
     return (
         <div className="relative overflow-hidden rounded-lg shadow-sm">
-            <div className='absolute z-10 top-5 left-5 bg-white text-black p-2 rounded-lg'>
+            {/* <div className='absolute z-10 top-5 left-5 bg-white text-black p-2 rounded-lg'>
                 Highlights {highlights?.length ? `(${highlights.length})` : ''}
-            </div>
+            </div> */}
 
             {isLoading ? (
                 <div className="w-full h-[40vh] bg-gray-200 animate-pulse flex items-center justify-center">

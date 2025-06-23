@@ -33,7 +33,10 @@ const usersWIthFamilyRegistered = totalUserWithFamily.filter(
   <h2 class="text-xl font-semibold text-slate-800 mb-6">System Statistics</h2>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
     <!-- All Requests Card -->
-    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+    <a
+      href="/tickets"
+      class="p-4 bg-slate-50 rounded-lg border border-slate-200"
+    >
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-medium text-slate-500">Total Requests</p>
@@ -56,10 +59,13 @@ const usersWIthFamilyRegistered = totalUserWithFamily.filter(
           </svg>
         </div>
       </div>
-    </div>
+    </a>
 
     <!-- Pending Requests Card -->
-    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+    <a
+      href="/tickets"
+      class="p-4 bg-slate-50 rounded-lg border border-slate-200"
+    >
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-medium text-slate-500">Pending Requests</p>
@@ -83,7 +89,7 @@ const usersWIthFamilyRegistered = totalUserWithFamily.filter(
           </svg>
         </div>
       </div>
-    </div>
+    </a>
 
     <!-- Done Requests Card -->
     <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">

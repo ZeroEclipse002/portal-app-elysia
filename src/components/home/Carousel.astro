@@ -24,7 +24,10 @@ const mockData = [
 const data = Astro.props.data || mockData;
 ---
 
-<div class="w-full flex justify-center items-center mb-6 bg-gradient-to-r from-red-50 via-white to-red-50">
+<div
+  class="w-full flex justify-center items-center mb-6 bg-gradient-to-r from-red-50 via-white to-red-50"
+  aria-label="Carousel block"
+>
   <div class="container mx-auto max-w-7xl px-8 py-4">
     <CarouselComponent client:load data={data} />
   </div>
