@@ -34,14 +34,7 @@ const documents: DownloadableResourcesType[] = downloadableResources || [];
     >
       {
         documents.length > 0 ? (
-          [
-            ...documents,
-            {
-              fileLink: "/public/business-letter-request.docx",
-              caption: "Business Letter Request",
-              createdAt: new Date().toISOString(),
-            },
-          ].map((doc) => (
+          [...documents].map((doc) => (
             <a
               href={doc.fileLink}
               target="_blank"
