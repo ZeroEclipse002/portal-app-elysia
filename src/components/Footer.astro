@@ -53,12 +53,20 @@
           class="mt-8 flex flex-wrap justify-start gap-4 text-xs sm:mt-0 lg:justify-end"
         >
           <li>
-            <a href="#" class="text-gray-500 transition hover:opacity-75">
+            <a
+              href="javascript:void(0)"
+              class="text-gray-500 transition hover:opacity-75"
+              id="open-tos"
+            >
               Terms & Conditions
             </a>
           </li>
           <li>
-            <a href="#" class="text-gray-500 transition hover:opacity-75">
+            <a
+              href="javascript:void(0)"
+              class="text-gray-500 transition hover:opacity-75"
+              id="open-privacy"
+            >
               Privacy Policy
             </a>
           </li>
@@ -66,4 +74,168 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal -->
+  <div
+    id="legal-modal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden"
+  >
+    <div
+      class="bg-white rounded-lg shadow-lg max-w-lg w-full max-h-[80vh] overflow-y-auto p-4 relative"
+    >
+      <button
+        id="close-legal-modal"
+        class="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-2xl font-bold"
+        >&times;</button
+      >
+      <h2 id="legal-modal-title" class="text-xl font-bold mb-4 text-red-700">
+      </h2>
+      <div
+        id="legal-modal-content"
+        class="text-gray-700 text-sm whitespace-pre-line"
+      >
+      </div>
+    </div>
+  </div>
 </footer>
+
+<script>
+  // Legal text content
+  document.addEventListener("astro:page-load", () => {
+    const tosContent = `TERMS AND CONDITIONS
+Welcome to the Barangay Marawoy Digital Services Portal!
+This official website allows residents and stakeholders to access services, submit requests, and stay updated on local governance. By using this website, you agree to the following Terms and Conditions. If you do not accept these terms, kindly refrain from using the site.
+
+1. Acceptance of Terms
+By accessing this portal, you confirm that you agree to these Terms of Use and any future amendments. Continued use of the site implies your acceptance.
+
+2. Purpose of the Portal
+This portal aims to:
+• Provide digital access to barangay services (e.g., ticketing, certificate requests)
+• Disseminate public announcements
+• Offer a communication channel with the Barangay office
+
+3. User Responsibilities
+You agree to:
+• Provide complete and accurate information
+• Use the portal only for legitimate purposes
+• Avoid misuse or abuse of the system
+
+4. Prohibited Actions
+Do not:
+• Submit false or malicious reports
+• Attempt to hack or bypass security
+• Use bots or unauthorized automation tools
+• Upload harmful files or viruses
+
+5. Intellectual Property
+All texts, logos, forms, and images on this site are the property of Barangay Marawoy unless otherwise stated. Unauthorized use or reproduction is strictly prohibited.
+
+6. Limitation of Liability
+We do our best to maintain accurate and functional services, but:
+• We do not guarantee uninterrupted access
+• We are not liable for losses due to system downtime, errors, or inaccurate content
+
+7. Updates and Revisions
+These Terms may change without prior notice. Users are responsible for reviewing this page regularly to stay informed.
+
+8. Governing Law
+These Terms are governed by the laws of the Republic of the Philippines. Any disputes shall be settled within the appropriate Philippine jurisdiction.
+
+9. Contact Us
+Questions? Contact us at:
+📧 Email: marawoybarangay@gmail.com
+🏢 Office: Barangay Hall, Marawoy, Lipa City, Batangas
+`;
+
+    const privacyContent = `PRIVACY POLICY
+Our Commitment to Privacy
+We are committed to protecting your privacy and ensuring the security of personal data collected through this portal, in compliance with the Data Privacy Act of 2012.
+
+1. Data We Collect
+When you use this portal, we may collect the following:
+• Full Name
+• Address
+• Contact Number
+• Email Address
+• Request or Ticket Details
+• Uploaded documents (if applicable)
+
+2. How Your Data Is Used
+Collected data is used to:
+• Process your service requests
+• Contact you regarding your submissions
+• Improve barangay services and responsiveness
+
+3. Data Storage and Security
+Your data is securely stored with safeguards such as:
+• Encrypted transmission (SSL)
+• Access control measures
+• Restricted internal access
+
+4. Data Sharing
+We do not sell or share your personal data with third parties unless:
+• Required by law or legal processes
+• Needed to fulfill legitimate barangay functions
+
+5. Your Rights
+You have the right to:
+• Access your personal data
+• Request corrections
+• Withdraw consent or request deletion (subject to applicable laws)
+
+6. Cookies and Logs
+Our site may collect anonymous traffic data such as:
+• Browser type
+• IP address
+• Date/time of access
+This helps improve site performance but does not identify you personally.
+
+7. Changes to This Policy
+This Privacy Policy may be updated. Significant changes will be announced on this website. Continued use of the portal implies agreement to the revised policy.
+
+8. Contact Us
+For concerns or requests about your data, please reach out:
+📧 Email: marawoybarangay@gmail.com
+🏢 Office: Barangay Hall, Marawoy, Lipa City, Batangas
+`;
+
+    // Modal logic
+    const modal = document.getElementById("legal-modal");
+    const modalTitle = document.getElementById("legal-modal-title");
+    const modalContent = document.getElementById("legal-modal-content");
+    const closeModalBtn = document.getElementById("close-legal-modal");
+
+    document.getElementById("open-tos").addEventListener("click", function () {
+      modalTitle.textContent = "Terms and Conditions";
+      modalContent.textContent = tosContent;
+      modal.classList.remove("hidden");
+    });
+
+    document
+      .getElementById("open-privacy")
+      .addEventListener("click", function () {
+        modalTitle.textContent = "Privacy Policy";
+        modalContent.textContent = privacyContent;
+        modal.classList.remove("hidden");
+      });
+
+    closeModalBtn.addEventListener("click", function () {
+      modal.classList.add("hidden");
+    });
+
+    // Optional: Close modal when clicking outside the modal content
+    modal.addEventListener("click", function (e) {
+      if (e.target === modal) {
+        modal.classList.add("hidden");
+      }
+    });
+
+    // Optional: Close modal on Escape key
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        modal.classList.add("hidden");
+      }
+    });
+  });
+</script>
