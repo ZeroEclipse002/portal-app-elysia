@@ -200,6 +200,7 @@ export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, 
                                                 <SelectItem value="residence">Residence</SelectItem>
                                                 <SelectItem value="indigency">Indigency</SelectItem>
                                                 <SelectItem value="clearance">Clearance</SelectItem>
+                                                <SelectItem value="business">Business Request</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>)}
@@ -283,9 +284,9 @@ export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, 
                                 </dt>
                                 <dd className="mt-2">
                                     <img
-                                        src={request.request.idPicture.url}
+                                        src={request.request.idPicture}
                                         alt="Request Picture"
-                                        className="rounded-lg shadow-sm w-full object-cover max-h-[32rem]"
+                                        className="rounded-lg aspect-video shadow-sm w-full object-cover max-h-[32rem]"
                                     />
                                 </dd>
                             </div>

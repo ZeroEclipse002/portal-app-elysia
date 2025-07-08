@@ -159,7 +159,7 @@ export const requestUpdateForm = pgTable("request_update_form", {
     id: uuid("id").primaryKey().defaultRandom(),
     requestId: uuid("request_id").references(() => requestUpdates.id, { onDelete: 'cascade' }),
     userId: text("user_id").references(() => user.id, { onDelete: 'cascade' }),
-    docType: text("doc_type", { enum: ['clearance', 'indigency', 'residence'] }).notNull(),
+    docType: text("doc_type", { enum: ['clearance', 'indigency', 'residence', 'business'] }).notNull(),
     form: jsonb("form").$type<{
         fullName: string;
         birthDate: string;
@@ -168,6 +168,8 @@ export const requestUpdateForm = pgTable("request_update_form", {
         completeAddress: string;
         purpose: string;
         yearsOfResidence?: number; // New field for residence certificate
+        businessName?: string;
+        businessAddress?: string;
     }>(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
 })

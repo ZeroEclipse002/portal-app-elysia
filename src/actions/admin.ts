@@ -414,7 +414,7 @@ export const admin = {
             message: z.string(),
             type: z.enum(['urgent', 'normal', 'form']),
             status: z.enum(['submitted', 'reviewed', 'approved', 'rejected']),
-            formType: z.enum(['residence', 'indigency', 'clearance']).nullable(),
+            formType: z.enum(['residence', 'indigency', 'clearance', 'business']).nullable(),
             closedChat: z.boolean().default(true)
         }).refine((e) => {
             if (e.type === 'form') {
@@ -449,7 +449,7 @@ export const admin = {
                 if (input.type === 'form') {
                     await tx.insert(requestUpdateForm).values({
                         requestId: reqUp.id,
-                        docType: input.formType as 'clearance' | 'indigency' | 'residence',
+                        docType: input.formType as 'clearance' | 'indigency' | 'residence' | 'business',
                         userId: request.userId,
                     })
                 }

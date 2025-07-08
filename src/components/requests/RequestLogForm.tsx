@@ -15,6 +15,8 @@ type FormFields = {
     yearsOfResidence: string;
     birthPlace: string;
     currentAddress: string;
+    businessName: string;
+    businessAddress: string;
 }
 
 export const RequestLogForm = ({ logFormData, docType, requestLogId, requestId, formLogId, isAdmin }: { logFormData: FormLog, docType: string, requestLogId: string, requestId: string, formLogId: string, isAdmin: boolean }) => {
@@ -23,9 +25,12 @@ export const RequestLogForm = ({ logFormData, docType, requestLogId, requestId, 
         birthDate: logFormData.form?.birthDate ?? '',
         completeAddress: logFormData.form?.completeAddress ?? '',
         purpose: logFormData.form?.purpose ?? '',
-        yearsOfResidence: logFormData.form?.yearsOfResidence ?? '',
+        yearsOfResidence: logFormData.form?.yearsOfResidence?.toString() ?? '',
         birthPlace: logFormData.form?.birthPlace ?? '',
         currentAddress: logFormData.form?.currentAddress ?? '',
+        businessName: '',
+        businessAddress: '',
+
     })
     const { mutate } = useSWRConfig()
 
@@ -39,7 +44,7 @@ export const RequestLogForm = ({ logFormData, docType, requestLogId, requestId, 
             try {
                 const response = await actions.submitForm({
                     requestUpdateId: requestLogId,
-                    formType: docType as 'residence' | 'indigency' | 'clearance',
+                    formType: docType as 'residence' | 'indigency' | 'clearance' | 'business',
                     form: formData as any,
                     requestFormLogId: formLogId
                 })
@@ -153,6 +158,34 @@ export const RequestLogForm = ({ logFormData, docType, requestLogId, requestId, 
                     required
                 />
             </div>
+            {docType === 'business' && (
+                <>
+                    <div className="space-y-2">
+                        <Label htmlFor="businessName">Business Name</Label>
+                        <Input
+                            disabled={pending || logFormData.form !== null}
+                            id="businessName"
+                            name="businessName"
+                            value={formData.businessName || ''}
+                            onChange={handleChange}
+                            placeholder="Enter your business name"
+                            required
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="businessAddress">Business Address</Label>
+                        <Input
+                            disabled={pending || logFormData.form !== null}
+                            id="businessAddress"
+                            name="businessAddress"
+                            value={formData.businessAddress || ''}
+                            onChange={handleChange}
+                            placeholder="Enter your business address"
+                            required
+                        />
+                    </div>
+                </>
+            )}
             <Button type="submit" className="w-full" disabled={pending || logFormData.form !== null}>
                 Submit
             </Button>

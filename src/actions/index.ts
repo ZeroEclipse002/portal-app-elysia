@@ -385,7 +385,7 @@ export const server = {
         input: z.object({
             requestUpdateId: z.string(),
             requestFormLogId: z.string(),
-            formType: z.enum(['residence', 'indigency', 'clearance']),
+            formType: z.enum(['residence', 'indigency', 'clearance', 'business']),
             form: z.object({
                 fullName: z.string(),
                 birthDate: z.coerce.date().refine(date => new Date(date) < new Date(), {
@@ -393,9 +393,11 @@ export const server = {
                 }),
                 completeAddress: z.string(),
                 purpose: z.string(),
-                yearsOfResidence: z.number().optional(),
+                yearsOfResidence: z.coerce.number().optional(),
                 birthPlace: z.string(),
                 currentAddress: z.string(),
+                businessName: z.string().optional(),
+                businessAddress: z.string().optional(),
             })
         }),
         handler: async (input, context) => {

@@ -67,9 +67,13 @@ export const requestRoutes = new Elysia()
                 throw new Error('Request not found');
             }
 
-            const pictureUrl = await utapi.getSignedURL(request.idPicture, {
-                expiresIn: 60 * 60
-            })
+            // const pictureUrl = await utapi.getSignedURL(request.idPicture, {
+            //     expiresIn: 60 * 60
+            // })
+
+            console.log('image', request.idPicture)
+
+            const pictureUrl = request.idPicture ? `https://vf20tf4oiz.ufs.sh/f/${request.idPicture}` : null;
 
             const response = {
                 request: {

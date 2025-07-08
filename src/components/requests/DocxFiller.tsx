@@ -20,6 +20,8 @@ interface FormDataDoc {
     purpose: string;
     currentDate: string;
     yearsOfResidence?: string; // New field for residence certificate
+    businessName?: string;
+    businessAddress?: string;
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -36,6 +38,8 @@ function DocxFiller({ requestLogsForm, docUserDetails }: { requestLogsForm: Form
         purpose: '',
         currentDate: new Date().toISOString().split('T')[0],
         yearsOfResidence: '',
+        businessName: '',
+        businessAddress: '',
     });
 
     const [docxFile, setDocxFile] = useState<File | null>(null);
@@ -150,8 +154,10 @@ function DocxFiller({ requestLogsForm, docUserDetails }: { requestLogsForm: Form
             currentDate: new Date().toISOString().split('T')[0],
             // @ts-ignore
             yearsOfResidence: selectedLog.form?.yearsOfResidence || '',
+            businessName: selectedLog.form?.businessName || '',
+            businessAddress: selectedLog.form?.businessAddress || '',
         });
-        setSelectedTemplate(selectedLog.docType === 'residence' ? '/residence.docx' : selectedLog.docType === 'indigency' ? '/indigency.docx' : '/clearance.docx');
+        setSelectedTemplate(selectedLog.docType === 'residence' ? '/residence.docx' : selectedLog.docType === 'indigency' ? '/indigency.docx' : selectedLog.docType === 'clearance' ? '/clearance.docx' : '/request-business.docx');
     };
 
     const handleUserDetailsSelection = () => {
@@ -324,6 +330,28 @@ function DocxFiller({ requestLogsForm, docUserDetails }: { requestLogsForm: Form
                                             />
                                         </div>
                                     )}
+                                    {selectedTemplate === '/request-business.docx' && (
+                                        <>
+                                            <div className="space-y-2">
+                                                <Label>Business Name</Label>
+                                                <Input
+                                                    name="businessName"
+                                                    value={formData.businessName}
+                                                    onChange={handleInputChange}
+                                                    placeholder="Enter business name"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Business Address</Label>
+                                                <Input
+                                                    name="businessAddress"
+                                                    value={formData.businessAddress}
+                                                    onChange={handleInputChange}
+                                                    placeholder="Enter business address"
+                                                />
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
@@ -339,6 +367,7 @@ function DocxFiller({ requestLogsForm, docUserDetails }: { requestLogsForm: Form
                                         <SelectItem value="/clearance.docx">Clearance</SelectItem>
                                         <SelectItem value="/indigency.docx">Indigency</SelectItem>
                                         <SelectItem value="/residence.docx">Residence</SelectItem>
+                                        <SelectItem value="/request-business.docx">Business Request</SelectItem>
                                     </SelectContent>
                                 </Select>
 

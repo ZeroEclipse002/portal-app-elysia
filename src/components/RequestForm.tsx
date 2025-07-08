@@ -175,6 +175,7 @@ export const RequestForm = () => {
                                                     <SelectItem value="clearance">Clearance</SelectItem>
                                                     <SelectItem value="indigency">Indigency</SelectItem>
                                                     <SelectItem value="certificate">Certificate</SelectItem>
+                                                    <SelectItem value="business">Business Request</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
