@@ -28,8 +28,8 @@ export const RequestLogForm = ({ logFormData, docType, requestLogId, requestId, 
         yearsOfResidence: logFormData.form?.yearsOfResidence?.toString() ?? '',
         birthPlace: logFormData.form?.birthPlace ?? '',
         currentAddress: logFormData.form?.currentAddress ?? '',
-        businessName: '',
-        businessAddress: '',
+        businessName: logFormData.form?.businessName ?? '',
+        businessAddress: logFormData.form?.businessAddress ?? '',
 
     })
     const { mutate } = useSWRConfig()
@@ -42,10 +42,15 @@ export const RequestLogForm = ({ logFormData, docType, requestLogId, requestId, 
 
         startTransition(async () => {
             try {
+                // Convert any null/undefined values to empty strings
+                const cleanedFormData = Object.fromEntries(
+                    Object.entries(formData).map(([key, value]) => [key, value || ''])
+                )
+
                 const response = await actions.submitForm({
                     requestUpdateId: requestLogId,
                     formType: docType as 'residence' | 'indigency' | 'clearance' | 'business',
-                    form: formData as any,
+                    form: cleanedFormData as any,
                     requestFormLogId: formLogId
                 })
 
@@ -85,80 +90,7 @@ export const RequestLogForm = ({ logFormData, docType, requestLogId, requestId, 
                     required
                 />
             </div>
-            <div className="space-y-2">
-                <Label htmlFor="birthDate">Birth Date</Label>
-                <Input
-                    type="date"
-                    disabled={pending || logFormData.form !== null}
-                    id="birthDate"
-                    name="birthDate"
-                    value={formData.birthDate || ''}
-                    onChange={handleChange}
-                    placeholder="Enter your birth date"
-                    required
-                />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="completeAddress">Complete Address</Label>
-                <Input
-                    disabled={pending || logFormData.form !== null}
-                    id="completeAddress"
-                    name="completeAddress"
-                    value={formData.completeAddress || ''}
-                    onChange={handleChange}
-                    placeholder="Enter your complete address"
-                    required
-                />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="purpose">Purpose</Label>
-                <Input
-                    disabled={pending || logFormData.form !== null}
-                    id="purpose"
-                    name="purpose"
-                    value={formData.purpose || ''}
-                    onChange={handleChange}
-                    placeholder="Enter your purpose"
-                    required
-                />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="yearsOfResidence">Years of Residence</Label>
-                <Input
-                    disabled={pending || logFormData.form !== null}
-                    id="yearsOfResidence"
-                    name="yearsOfResidence"
-                    value={formData.yearsOfResidence || ''}
-                    onChange={handleChange}
-                    placeholder="Enter your years of residence"
-                    required
-                />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="birthPlace">Birth Place</Label>
-                <Input
-                    disabled={pending || logFormData.form !== null}
-                    id="birthPlace"
-                    name="birthPlace"
-                    value={formData.birthPlace || ''}
-                    onChange={handleChange}
-                    placeholder="Enter your birth place"
-                    required
-                />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="currentAddress">Current Address</Label>
-                <Input
-                    disabled={pending || logFormData.form !== null}
-                    id="currentAddress"
-                    name="currentAddress"
-                    value={formData.currentAddress || ''}
-                    onChange={handleChange}
-                    placeholder="Enter your current address"
-                    required
-                />
-            </div>
-            {docType === 'business' && (
+            {docType === 'business' ? (
                 <>
                     <div className="space-y-2">
                         <Label htmlFor="businessName">Business Name</Label>
@@ -181,6 +113,95 @@ export const RequestLogForm = ({ logFormData, docType, requestLogId, requestId, 
                             value={formData.businessAddress || ''}
                             onChange={handleChange}
                             placeholder="Enter your business address"
+                            required
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="birthDate">Birth Date</Label>
+                        <Input
+                            type="date"
+                            disabled={pending || logFormData.form !== null}
+                            id="birthDate"
+                            name="birthDate"
+                            value={formData.birthDate || ''}
+                            onChange={handleChange}
+                            placeholder="Enter your birth date"
+                            required
+                        />
+                    </div>
+                </>
+            ) : (
+                <>
+                    <div className="space-y-2">
+                        <Label htmlFor="birthDate">Birth Date</Label>
+                        <Input
+                            type="date"
+                            disabled={pending || logFormData.form !== null}
+                            id="birthDate"
+                            name="birthDate"
+                            value={formData.birthDate || ''}
+                            onChange={handleChange}
+                            placeholder="Enter your birth date"
+                            required
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="completeAddress">Complete Address</Label>
+                        <Input
+                            disabled={pending || logFormData.form !== null}
+                            id="completeAddress"
+                            name="completeAddress"
+                            value={formData.completeAddress || ''}
+                            onChange={handleChange}
+                            placeholder="Enter your complete address"
+                            required
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="purpose">Purpose</Label>
+                        <Input
+                            disabled={pending || logFormData.form !== null}
+                            id="purpose"
+                            name="purpose"
+                            value={formData.purpose || ''}
+                            onChange={handleChange}
+                            placeholder="Enter your purpose"
+                            required
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="yearsOfResidence">Years of Residence</Label>
+                        <Input
+                            disabled={pending || logFormData.form !== null}
+                            id="yearsOfResidence"
+                            name="yearsOfResidence"
+                            value={formData.yearsOfResidence || ''}
+                            onChange={handleChange}
+                            placeholder="Enter your years of residence"
+                            required
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="birthPlace">Birth Place</Label>
+                        <Input
+                            disabled={pending || logFormData.form !== null}
+                            id="birthPlace"
+                            name="birthPlace"
+                            value={formData.birthPlace || ''}
+                            onChange={handleChange}
+                            placeholder="Enter your birth place"
+                            required
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="currentAddress">Current Address</Label>
+                        <Input
+                            disabled={pending || logFormData.form !== null}
+                            id="currentAddress"
+                            name="currentAddress"
+                            value={formData.currentAddress || ''}
+                            onChange={handleChange}
+                            placeholder="Enter your current address"
                             required
                         />
                     </div>
