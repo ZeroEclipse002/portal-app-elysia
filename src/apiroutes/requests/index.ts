@@ -73,7 +73,7 @@ export const requestRoutes = new Elysia()
 
             console.log('image', request.idPicture)
 
-            const pictureUrl = request.idPicture ? `https://vf20tf4oiz.ufs.sh/f/${request.idPicture}` : null;
+            const pictureUrl = request.idPicture ? `https://${import.meta.env.UPLOADTHING_SITEKEY}.ufs.sh/f/${request.idPicture}` : null;
 
             const response = {
                 request: {
