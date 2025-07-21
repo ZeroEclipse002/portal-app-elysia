@@ -20,6 +20,8 @@ export const RequestForm = () => {
     const [requestType, setRequestType] = useState<string>('')
     const [otherRequestType, setOtherRequestType] = useState<string>('')
     const [requestDetails, setRequestDetails] = useState<string>('')
+    const [businessName, setBusinessName] = useState<string>('')
+    const [businessAddress, setBusinessAddress] = useState<string>('')
     const [familyMemberId, setFamilyMemberId] = useState<string>('')
     const [idPicture, setIdPicture] = useState<File | null>(null)
     const [open, setOpen] = useState(false)
@@ -34,7 +36,13 @@ export const RequestForm = () => {
         const formData = new FormData()
         formData.append('requestType', requestType)
         formData.append('otherRequestType', otherRequestType)
-        formData.append('requestDetails', requestDetails)
+
+        // For business requests, combine business name and address into a single string
+        const finalRequestDetails = purpose === 'business'
+            ? `Business Name: ${businessName}\nBusiness Address: ${businessAddress}`
+            : requestDetails
+
+        formData.append('requestDetails', finalRequestDetails)
         formData.append('idPicture', idPicture as File)
         formData.append('familyMemberId', familyMemberId || 'selfdoc')
         formData.append('purpose', purpose || '')
@@ -65,6 +73,8 @@ export const RequestForm = () => {
                 setRequestType('')
                 setOtherRequestType('')
                 setRequestDetails('')
+                setBusinessName('')
+                setBusinessAddress('')
                 setIdPicture(null)
                 mutate('/api/requests')
             }
@@ -120,7 +130,7 @@ export const RequestForm = () => {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="document">Document Request</SelectItem>
-                                <SelectItem value="permit">Permit Application</SelectItem>
+                                {/* <SelectItem value="permit">Permit Application</SelectItem> */}
                                 <SelectItem value="blotter">Blotter Report</SelectItem>
                                 <SelectItem value="other">Other Inquiry</SelectItem>
                             </SelectContent>
@@ -186,13 +196,30 @@ export const RequestForm = () => {
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-sm font-medium text-gray-700">Request Details</Label>
-                        <Textarea
+                        <Label className="text-sm font-medium text-gray-700">{requestType === 'blotter' ? "Proof Details" : purpose === 'business' ? "Business Details" : "Request Details"}</Label>
+                        {purpose === 'business' ? (
+                            <div className="border border-dashed border-gray-200 rounded-lg p-4 bg-gray-50">
+                                <Label className="text-sm font-medium text-gray-700">Business Name</Label>
+                                <Input
+                                    value={businessName || ''}
+                                    onChange={(e) => setBusinessName(e.target.value)}
+                                    className="bg-white border-gray-200 mb-4"
+                                    placeholder="Enter business name..."
+                                />
+                                <Label className="text-sm font-medium text-gray-700">Business Address</Label>
+                                <Input
+                                    value={businessAddress || ''}
+                                    onChange={(e) => setBusinessAddress(e.target.value)}
+                                    className="bg-white border-gray-200"
+                                    placeholder="Enter business address..."
+                                />
+                            </div>
+                        ) : (<Textarea
                             value={requestDetails || ''}
                             onChange={(e) => setRequestDetails(e.target.value)}
                             className="min-h-[120px] bg-white border-gray-200 resize-none"
                             placeholder="Please provide additional details..."
-                        />
+                        />)}
                         <p className="text-xs text-gray-500">
                             Provide as much detail as possible to help us process your request efficiently.
                         </p>
@@ -200,14 +227,14 @@ export const RequestForm = () => {
 
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label className="text-sm font-medium text-gray-700">ID Picture</Label>
+                            <Label className="text-sm font-medium text-gray-700">{requestType === 'blotter' ? "Photo of Proof" : "ID Picture"}</Label>
                             <Input
                                 type="file"
                                 className="bg-white border-gray-200"
                                 onChange={handleFileChange}
                             />
                             <p className="text-xs text-gray-500">
-                                Upload a clear picture of your valid ID.
+                                {requestType === 'blotter' ? "Upload a clear photo of the proof of your request." : "Upload a clear picture of your valid ID."}
                             </p>
                         </div>
 

@@ -44,6 +44,7 @@ if (Astro.locals.user?.role !== "admin") {
         <div
           class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 transition-all duration-200 hover:shadow-md overflow-hidden accordion-section"
           data-section="users"
+          id="userssection"
         >
           <div
             class="p-6 border-b border-slate-100 flex items-center justify-between cursor-pointer accordion-header"
@@ -353,6 +354,14 @@ if (Astro.locals.user?.role !== "admin") {
       // Initialize all sections as collapsed by default
       const sections = document.querySelectorAll(".accordion-section");
       sections.forEach((section) => section.classList.add("collapsed"));
+      // Check URL params for users=open
+      const searchParams = new URLSearchParams(window.location.search);
+      if (searchParams.get("users") === "open") {
+        const usersSection = document.querySelector('[data-section="users"]');
+        if (usersSection) {
+          usersSection.classList.remove("collapsed");
+        }
+      }
     });
   </script>
 </Layout>

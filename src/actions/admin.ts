@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { downloadableContent, highlights, postContent, posts, priority, requests, requestUpdateForm, requestUpdates, sectionSequence, user } from "@/db/schema";
+import { concernBoard, downloadableContent, highlights, postContent, posts, priority, requests, requestUpdateForm, requestUpdates, sectionSequence, user } from "@/db/schema";
 import { generateId } from "@/lib/utils";
 import { utapi } from "@/utconfig/uploadthing";
 import { ActionError, defineAction, type ActionAPIContext } from "astro:actions";
@@ -660,6 +660,44 @@ export const admin = {
             }
         }
     }),
+    replyConcern: defineAction({
+        accept: 'json',
+        input: z.object({
+            concernId: z.number(),
+            reply: z.string()
+        }),
+        handler: async (input, context) => {
+            await authMiddleware(context)
+
+            const [prevConcern] = await db.select().from(concernBoard).where(eq(concernBoard.id, input.concernId))
+
+            if (!prevConcern) {
+                throw new ActionError({
+                    code: 'NOT_FOUND',
+                    message: 'Concern not found'
+                })
+            }
+
+            const appendedReply = prevConcern.reply ? `${prevConcern.reply}(${input.reply}-[${prevConcern.reply.split(/\([^)]*\)/).filter(Boolean).length}])` : `(${input.reply}-[0])`
+
+            const [concern] = await db.update(concernBoard).set({
+                reply: appendedReply,
+                replyAt: new Date()
+            }).where(eq(concernBoard.id, input.concernId)).returning()
+
+            if (!concern) {
+                throw new ActionError({
+                    code: 'NOT_FOUND',
+                    message: 'Concern not found'
+                })
+            }
+
+            return {
+                success: true,
+                concernId: concern.id
+            }
+        }
+    })
 }
 
 

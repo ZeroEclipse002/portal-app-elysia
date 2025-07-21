@@ -3,7 +3,8 @@ import { getPosts, getAllRequests, getHighlights, getDownloadableResources, getL
 import { db } from '@/db';
 import { userMiddleware } from '../auth';
 import { bearer } from '@elysiajs/bearer'
-import { requests } from '@/db/schema';
+import { requests, user as userTable } from '@/db/schema';
+import { and, eq, gte, lt } from 'drizzle-orm';
 
 export const adminRoutes = new Elysia()
     .use(bearer())
@@ -187,6 +188,42 @@ export const adminRoutes = new Elysia()
                 description: 'Get all users',
                 responses: {
                     200: { description: 'Users retrieved successfully' }
+                }
+            }
+        })
+        .get('/admin/newaccounts', async ({ user }) => {
+            if (!user) {
+                throw new Error('Unauthorized');
+            }
+
+            if (user.role !== 'admin') {
+                throw new Error('Unauthorized');
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            const newAccounts = await db.select()
+                .from(userTable)
+                .where(
+                    and(
+                        gte(userTable.createdAt, today),
+                        lt(userTable.createdAt, tomorrow),
+                        eq(userTable.approved, false)
+                    )
+                );
+
+            return newAccounts.length > 0 ? true : false;
+
+        }, {
+            detail: {
+                tags: ['Admin'],
+                description: 'Check if there are new accounts',
+                responses: {
+                    200: { description: 'New accounts retrieved successfully' },
+                    401: { description: 'Unauthorized - Not authenticated or not an admin' }
                 }
             }
         })

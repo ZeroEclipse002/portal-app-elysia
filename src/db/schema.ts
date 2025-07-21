@@ -208,6 +208,8 @@ export const concernBoard = pgTable("concern_board", {
     id: serial("id").primaryKey(),
     userId: text("user_id").references(() => user.id, { onDelete: 'set null' }),
     message: text("message").notNull(),
+    reply: text("reply"),
+    replyAt: timestamp("reply_at"),
     createdAt: timestamp("created_at").notNull().defaultNow()
 })
 

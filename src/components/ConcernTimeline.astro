@@ -1,5 +1,7 @@
 ---
 import { db } from "@/db";
+import { ConcernReply } from "./ConcernReply";
+import { useState } from "react";
 
 const { dateParams } = Astro.props;
 
@@ -42,6 +44,17 @@ const concerns = await db.query.concernBoard.findMany({
               <p class="text-xs opacity-70">
                 from: {concern.user?.name} & family
               </p>
+              <ConcernReply
+                concern={{
+                  id: concern.id,
+                  message: concern.message,
+                  reply: concern.reply,
+                  replyAt: concern.replyAt
+                    ? concern.replyAt.toISOString()
+                    : null,
+                }}
+                client:only="react"
+              />
             </div>
           </div>
         ))}

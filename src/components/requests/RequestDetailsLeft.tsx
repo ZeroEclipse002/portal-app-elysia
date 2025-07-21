@@ -7,12 +7,15 @@ import { Textarea } from "../ui/textarea";
 import { Select, SelectItem } from "../ui/select";
 import { SelectContent, SelectTrigger, SelectValue } from "../ui/select";
 import { Button } from "../ui/button";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, Download } from "lucide-react";
 import { actions } from "astro:actions";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Switch } from "../ui/switch";
 import { fetcher } from "@/lib/utils";
+import { isBusinessRequest, parseBusinessDetails } from "@/utils/format";
+import { saveAs } from 'file-saver';
+import { createReport } from 'docx-templates';
 
 
 export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, isAdmin: boolean }) => {
@@ -21,6 +24,7 @@ export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, 
     const { mutate } = useSWRConfig()
     const [status, setStatus] = useState<"submitted" | "reviewed" | "approved" | "rejected" | undefined>(request?.request.status)
     const [type, setType] = useState<"urgent" | "normal" | "form" | undefined>('normal')
+    const [isDownloading, setIsDownloading] = useState(false)
 
     if (error) {
         return <div>Error loading request</div>
@@ -107,6 +111,59 @@ export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, 
             console.error(error)
         }
 
+    }
+
+    const handleDownloadBusinessRequest = async () => {
+        if (!isBusinessRequest(request.request.details)) {
+            toast.error("This is not a business request")
+            return
+        }
+
+        setIsDownloading(true)
+        try {
+            const { businessName, businessAddress } = parseBusinessDetails(request.request.details)
+
+            // Create form data for the document
+            const formData = {
+                fullName: request.request.user.name,
+                age: 0, // We don't have age in the request data
+                birthDate: '',
+                birthPlace: '',
+                currentAddress: '',
+                completeAddress: '',
+                purpose: 'business',
+                currentDate: new Date().toISOString().split('T')[0],
+                businessName: businessName,
+                businessAddress: businessAddress,
+            }
+
+            // Fetch the business request template
+            const fileDoc = await fetch('/request-business.docx').then((res) => res.blob())
+            const templateArrayBuffer = await fileDoc.arrayBuffer()
+
+            // Generate the filled document
+            const filledDocument = await createReport({
+                template: new Uint8Array(templateArrayBuffer),
+                data: formData,
+                cmdDelimiter: ['+++INS', '+++'],
+                noSandbox: true,
+            })
+
+            // Create and download the blob
+            const blob = new Blob([filledDocument], {
+                type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            })
+
+            const fileName = `${businessName}_Business_Request_${Date.now()}.docx`
+            saveAs(blob, fileName)
+
+            toast.success('Business request document downloaded successfully!')
+        } catch (error) {
+            console.error("Error downloading business request:", error)
+            toast.error("Failed to download business request document")
+        } finally {
+            setIsDownloading(false)
+        }
     }
 
     return (
@@ -277,10 +334,32 @@ export const RequestDetailsLeft = ({ requestId, isAdmin }: { requestId: string, 
                                 <dd className="mt-1 text-sm text-gray-700 leading-relaxed">
                                     {request.request.details}
                                 </dd>
+                                {/* Download Business Request Button - Only show for business requests and non-admin users */}
+                                {!isAdmin && isBusinessRequest(request.request.details) && (
+                                    <div className="mt-3">
+                                        <Button
+                                            onClick={handleDownloadBusinessRequest}
+                                            disabled={isDownloading}
+                                            className="w-full bg-green-600 hover:bg-green-700 text-white"
+                                        >
+                                            {isDownloading ? (
+                                                <div className="flex items-center gap-2">
+                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                                    <span>Generating Document...</span>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-2">
+                                                    <Download className="h-4 w-4" />
+                                                    <span>Download Business Request Document</span>
+                                                </div>
+                                            )}
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                             <div className="px-6 py-4">
                                 <dt className="text-sm font-medium text-gray-500 mb-2">
-                                    ID Picture
+                                    {request.request.type === 'blotter' ? "Photo of Proof" : "ID Picture"}
                                 </dt>
                                 <dd className="mt-2">
                                     <img

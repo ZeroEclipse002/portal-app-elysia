@@ -51,7 +51,7 @@ export function HeroSectionContent({ recent, priority, initialData }: HeroSectio
                             }}
                             src={data.image}
                             alt={data.title}
-                            className="w-full h-full object-cover object-center max-h-[40vh] sm:max-h-none"
+                            className="w-full h-full object-cover object-center"
                         />
                     </div>
                 )}

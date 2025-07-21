@@ -3,11 +3,10 @@ import { ModalAuth } from "./ModalAuth"
 import { Signout } from "./Signout"
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "./ui/navigation-menu"
 import React, { useState } from "react"
+import { AdminNewAccountsWidget } from "./AdminNewAccountsWidget";
 
 
-
-
-export const MainHeader = ({ role, pathname, approved, hasSession }: { role: string | null, pathname: string, approved: boolean, hasSession: boolean }) => {
+export const MainHeader = ({ role, pathname, approved, hasSession, isAdmin }: { role: string | null, pathname: string, approved: boolean, hasSession: boolean, isAdmin: boolean }) => {
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const closeTimeout = React.useRef<NodeJS.Timeout | null>(null);
@@ -28,6 +27,7 @@ export const MainHeader = ({ role, pathname, approved, hasSession }: { role: str
     };
     return (
         <>
+            {isAdmin && <AdminNewAccountsWidget />}
             {/* Red Header Bar */}
             <div className="w-full bg-red-600 py-3">
                 <h1 className="text-center text-white font-bold text-lg tracking-wide">

@@ -9,7 +9,7 @@ import NoticeBar from "@/components/NoticeBar.astro";
 import Footer from "@/components/Footer.astro";
 const status = Astro.locals.user?.role ?? null;
 const approved = Astro.locals.user?.approved ?? false;
-
+const isAdmin = Astro.locals.user?.role === "admin";
 console.log("Astro.locals.user", Astro.locals.user);
 ---
 
@@ -30,6 +30,7 @@ console.log("Astro.locals.user", Astro.locals.user);
       role={status}
       pathname={Astro.url.pathname}
       approved={approved}
+      isAdmin={isAdmin}
       client:only="react"
     />
     <Toaster transition:persist client:only />
