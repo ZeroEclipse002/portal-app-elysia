@@ -24,7 +24,7 @@ export const ConcernReply: React.FC<ConcernReplyProps> = ({ concern, onReplied }
     const [loading, setLoading] = useState(false);
 
     // Only admins can see the reply form
-    if (user?.role !== "admin") return null;
+    // if (user?.role !== "admin") return null;
 
     // Parse replies from the reply string (format: (reply-[index]))
     // Remove the -[index] part for display
@@ -72,7 +72,7 @@ export const ConcernReply: React.FC<ConcernReplyProps> = ({ concern, onReplied }
                     ))}
                 </ul>
             )}
-            <form onSubmit={handleReply} className="flex gap-2 items-center">
+            {user?.role === "admin" && (<form onSubmit={handleReply} className="flex gap-2 items-center">
                 <Input
                     value={reply}
                     onChange={(e) => setReply(e.target.value)}
@@ -82,7 +82,7 @@ export const ConcernReply: React.FC<ConcernReplyProps> = ({ concern, onReplied }
                 <Button type="submit" disabled={loading || !reply.trim()}>
                     {loading ? "Sending..." : "Reply"}
                 </Button>
-            </form>
+            </form>)}
         </div>
     );
 }; 
